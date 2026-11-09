@@ -9,7 +9,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem("is_authenticated") === "true";
   });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading] = useState<boolean>(false);
 
   useEffect(() => {
     localStorage.setItem("is_authenticated", String(isAuthenticated));
