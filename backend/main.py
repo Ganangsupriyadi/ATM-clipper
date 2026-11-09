@@ -106,7 +106,7 @@ if custom_cors:
 app.add_middleware(
     CORSMiddleware,
     # Allow local dev and all variations of Tauri custom protocols (including tauri.localhost on Windows), plus cloud web app
-    allow_origin_regex=cors_regex,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
