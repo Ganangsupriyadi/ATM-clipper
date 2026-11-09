@@ -5,7 +5,7 @@ export const API_URL =
   (typeof window !== "undefined" &&
     (localStorage.getItem("AUTO_CLIPPER_API_URL") ||
       localStorage.getItem("ac_api_url"))) ||
-  "http://localhost:8000";
+  "https://royalty-subdivision-reggae-dictionary.trycloudflare.com/";
 
 export const STORAGE_AUTH_KEY = "AUTO_CLIPPER_WEB_TOKEN";
 export const STORAGE_AUTH_LEGACY_KEY = "ac_web_token";
