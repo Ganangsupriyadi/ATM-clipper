@@ -7,8 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional
-from backend.db import init_db, get_all_history, delete_history, get_app_data_dir
-from backend.logger import log_error, get_log_content
+from services.jobs.db import init_db, get_all_history, delete_history, get_app_data_dir
+from utils.logger import log_error, get_log_content
 import os
 import sys
 import shutil
@@ -83,7 +83,7 @@ if valid_paths:
 # Initialize DB on startup
 init_db()
 
-app = FastAPI(title="Auto Clipper API")
+app = FastAPI(title="ATM Clipper")
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

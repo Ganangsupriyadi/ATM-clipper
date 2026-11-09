@@ -143,7 +143,7 @@ export const PromptJsonModal: React.FC<{
           <div className="p-6 border-b border-border bg-white">
              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                   <MessageSquareQuote className="w-5 h-5 text-purple-600" />
+                   <MessageSquareQuote className="w-5 h-5 text-emerald-600" />
                    <h2 className="text-xl font-bold text-text-primary">Review AI Prompt & JSON</h2>
                 </div>
                 <button onClick={() => !isSubmitting && onClose()} disabled={isSubmitting} className="text-text-tertiary hover:text-text-primary transition-colors disabled:opacity-50"><XCircle className="w-6 h-6" /></button>
@@ -158,8 +158,8 @@ export const PromptJsonModal: React.FC<{
                   <span className="flex items-center gap-2 font-medium text-sm text-text-primary"><span className="w-2 h-2 rounded-full bg-emerald-500"/> ChatGPT</span>
                   <ExternalLink className="w-4 h-4 text-text-tertiary" />
                 </button>
-                <button onClick={() => handleLLMLaunch("https://claude.ai")} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-border hover:border-amber-500/50 hover:bg-amber-50/50 transition-colors">
-                  <span className="flex items-center gap-2 font-medium text-sm text-text-primary"><span className="w-2 h-2 rounded-full bg-amber-500"/> Claude</span>
+                <button onClick={() => handleLLMLaunch("https://claude.ai")} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-border hover:border-emerald-500/50 hover:bg-emerald-50/50 transition-colors">
+                  <span className="flex items-center gap-2 font-medium text-sm text-text-primary"><span className="w-2 h-2 rounded-full bg-emerald-500"/> Claude</span>
                   <ExternalLink className="w-4 h-4 text-text-tertiary" />
                 </button>
              </div>
@@ -182,7 +182,7 @@ export const PromptJsonModal: React.FC<{
           <div className="p-6 bg-white">
              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                   <FileJson className="w-5 h-5 text-purple-600" />
+                   <FileJson className="w-5 h-5 text-emerald-600" />
                    <h3 className="font-semibold text-text-primary">Paste JSON Response</h3>
                 </div>
                 <button onClick={handlePaste} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 border border-border text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-slate-200 transition-colors">
@@ -195,7 +195,7 @@ export const PromptJsonModal: React.FC<{
                 onChange={(e) => setInputJson(e.target.value)}
                 placeholder="Paste the JSON response from AI here..."
                 className={`w-full h-48 bg-slate-50 font-mono text-sm p-4 rounded-2xl border focus:outline-none focus:bg-white transition-all resize-y text-text-primary ${
-                  error ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : parsedCount ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" : "border-border focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  error ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : parsedCount ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" : "border-border focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 }`}
              />
 
@@ -221,7 +221,7 @@ export const PromptJsonModal: React.FC<{
              <button 
                 onClick={handleFinalSubmit}
                 disabled={isSubmitting || !!error || inputJson.trim() === ""}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-sm disabled:opacity-50 transition-all"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm disabled:opacity-50 transition-all"
              >
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
                 Resume Job

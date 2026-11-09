@@ -26,7 +26,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           disabled={disabled}
         />
         <div className={`block w-10 h-6 rounded-full transition-colors duration-200 ${
-          checked ? 'bg-purple-600 shadow-sm' : 'bg-slate-200 border border-slate-300'
+          checked ? 'bg-emerald-600 shadow-sm' : 'bg-slate-200 border border-slate-300'
         }`}></div>
         <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${
           checked ? 'transform translate-x-4' : ''

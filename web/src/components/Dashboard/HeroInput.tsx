@@ -197,9 +197,9 @@ export const HeroInput: React.FC<HeroInputProps> = ({
       <div className="space-y-2.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
           <label htmlFor="video-url" className="text-sm font-semibold text-text-primary flex items-center gap-2">
-            <LinkIcon className="w-4 h-4 text-purple-600" />
+            <LinkIcon className="w-4 h-4 text-emerald-600" />
             <span>Source Video</span>
-            <span className="text-xs font-normal text-purple-600">*Required</span>
+            <span className="text-xs font-normal text-emerald-600">*Required</span>
           </label>
           <div className="flex items-center gap-2 text-xs text-text-secondary">
             <span className="hidden sm:inline">Supports:</span>
@@ -223,7 +223,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
             className={`w-full pl-3 sm:pl-4 pr-24 sm:pr-32 py-2.5 sm:py-3 bg-bg-surface/50 border rounded-xl text-text-primary placeholder:text-text-tertiary text-xs sm:text-sm focus:outline-none focus:bg-white focus:ring-2 transition-all font-mono ${
               urlError
                 ? "border-red-500/80 focus:ring-red-500/30"
-                : "border-border focus:border-purple-500 focus:ring-purple-500/20"
+                : "border-border focus:border-emerald-500 focus:ring-emerald-500/20"
             }`}
           />
           <div className="absolute right-2 flex items-center gap-1">
@@ -233,7 +233,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
               className="px-2.5 py-1.5 bg-bg-surface hover:bg-slate-200 text-text-secondary hover:text-text-primary text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 border border-border"
               title="Browse Google Drive"
             >
-              <HardDrive className="w-3.5 h-3.5 text-purple-600" />
+              <HardDrive className="w-3.5 h-3.5 text-emerald-600" />
               <span className="hidden sm:inline">Drive</span>
             </button>
             {url && (
@@ -298,7 +298,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
               onClick={() => setTrackingMode("auto")}
               className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
                 trackingMode === "auto"
-                  ? "border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500/30"
+                  ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
                   : "border-border bg-white text-text-secondary hover:border-slate-300"
               }`}
             >
@@ -310,7 +310,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
               onClick={() => setTrackingMode("center")}
               className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
                 trackingMode === "center"
-                  ? "border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500/30"
+                  ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
                   : "border-border bg-white text-text-secondary hover:border-slate-300"
               }`}
             >
@@ -331,7 +331,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
                 onClick={() => setFaceTrackingEngine("haar")}
                 className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
                   faceTrackingEngine === "haar"
-                    ? "border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500/30"
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
                     : "border-border bg-white text-text-secondary hover:border-slate-300"
                 }`}
               >
@@ -343,7 +343,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
                 onClick={() => setFaceTrackingEngine("mediapipe")}
                 className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
                   faceTrackingEngine === "mediapipe"
-                    ? "border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500/30"
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
                     : "border-border bg-white text-text-secondary hover:border-slate-300"
                 }`}
               >
@@ -429,7 +429,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
           className="w-full px-4 py-3 flex items-center justify-between text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-bg-surface/70 transition-colors border-0"
         >
           <div className="flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-purple-600" />
+            <Sliders className="w-4 h-4 text-emerald-600" />
             <span>Transcription Settings</span>
           </div>
           <span className="text-[11px] text-text-tertiary font-mono">
@@ -451,7 +451,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Podcast Episode 5"
-                className="w-full px-3.5 py-2 bg-bg-surface/50 border border-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                className="w-full px-3.5 py-2 bg-bg-surface/50 border border-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
 
@@ -465,7 +465,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full px-3 py-2 bg-bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full px-3 py-2 bg-bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 >
                   <option value="auto">Auto Detect (Whisper VAD)</option>
                   <option value="id">Indonesian (Bahasa)</option>
@@ -477,13 +477,13 @@ export const HeroInput: React.FC<HeroInputProps> = ({
 
               <div className="space-y-1.5">
                 <label className="font-medium text-text-secondary flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Faster Whisper Model</span>
                 </label>
                 <select
                   value={whisperModel}
                   onChange={(e) => setWhisperModel(e.target.value)}
-                  className="w-full px-3 py-2 bg-bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full px-3 py-2 bg-bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 >
                   <option value="small">small (Fastest, High Accuracy)</option>
                   <option value="medium">medium (Balanced for Podcast)</option>
@@ -499,7 +499,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
                 <select
                   value={maxClips}
                   onChange={(e) => setMaxClips(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full px-3 py-2 bg-bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 >
                   <option value={0}>Auto (Based on duration)</option>
                   <option value={1}>1 Clip</option>
@@ -517,7 +517,7 @@ export const HeroInput: React.FC<HeroInputProps> = ({
         <button
           type="submit"
           disabled={isSubmitting || !url.trim()}
-          className="w-full py-3 sm:py-3.5 px-4 sm:px-6 bg-purple-600 hover:bg-purple-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
+          className="w-full py-3 sm:py-3.5 px-4 sm:px-6 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
         >
           {isSubmitting ? (
             <>

@@ -94,8 +94,8 @@ export const BusyOverlay: React.FC = () => {
       <div className="w-full max-w-md bg-white border border-border rounded-3xl shadow-2xl p-6 sm:p-7 flex flex-col gap-5 animate-slide-up">
         {/* Header Icon + Title */}
         <div className="flex items-center gap-3.5">
-          <div className="p-2.5 bg-purple-50 rounded-2xl border border-purple-100 shrink-0">
-            <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+          <div className="p-2.5 bg-emerald-50 rounded-2xl border border-emerald-100 shrink-0">
+            <Loader2 className="w-6 h-6 text-emerald-600 animate-spin" />
           </div>
           <div className="min-w-0">
             <h3 className="font-bold text-base sm:text-lg text-text-primary">Sedang Memproses…</h3>
@@ -109,7 +109,7 @@ export const BusyOverlay: React.FC = () => {
         </div>
 
         {/* Warning Note */}
-        <div className="p-3.5 bg-purple-50/60 border border-purple-100 rounded-2xl text-xs text-purple-900 leading-relaxed">
+        <div className="p-3.5 bg-emerald-50/60 border border-emerald-100 rounded-2xl text-xs text-emerald-900 leading-relaxed">
           <p>
             Mohon tunggu hingga proses selesai. Video sedang diproses di GPU Colab — jangan tutup browser agar sinkronisasi tetap berjalan.
           </p>

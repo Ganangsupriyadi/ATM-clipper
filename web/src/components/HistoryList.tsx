@@ -121,11 +121,11 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
       case "DONE":
         return <CheckCircle2 className="w-5 h-5 text-green-500" />;
       case "AWAITING_MANUAL":
-        return <Clock className="w-5 h-5 text-amber-500" />;
+        return <Clock className="w-5 h-5 text-emerald-500" />;
       case "ERROR":
         return <AlertCircle className="w-5 h-5 text-red-500" />;
       default:
-        return <Clock className="w-5 h-5 text-purple-600 animate-spin" />;
+        return <Clock className="w-5 h-5 text-emerald-600 animate-spin" />;
     }
   };
 
@@ -133,7 +133,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
     return (
       <div className="flex items-center justify-center p-12 text-text-tertiary">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-purple-600/30 border-t-purple-600 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-emerald-600/30 border-t-emerald-600 rounded-full animate-spin" />
           <span className="text-xs font-mono">Loading history...</span>
         </div>
       </div>
@@ -166,7 +166,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
         return (
           <div
             key={job.id}
-            className="bg-white border border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col hover:border-purple-200 hover:shadow-md transition-all shadow-sm"
+            className="bg-white border border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col hover:border-emerald-200 hover:shadow-md transition-all shadow-sm"
           >
             {/* Header: Title & Status Icon */}
             <div className="flex items-start justify-between gap-3 mb-3">
@@ -199,7 +199,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
 
               <div className="bg-bg-surface/70 px-3 py-2 rounded-xl flex flex-col justify-center">
                 <span className="text-[10px] uppercase font-semibold text-text-tertiary">Progress</span>
-                <span className="font-semibold text-purple-600 truncate">
+                <span className="font-semibold text-emerald-600 truncate">
                   {job.progress || "Idle"}
                 </span>
               </div>
@@ -228,7 +228,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
               <div className="mt-2 mb-4 pt-4 border-t border-border">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Film className="w-4 h-4 text-purple-600" />
+                    <Film className="w-4 h-4 text-emerald-600" />
                     <h4 className="text-xs sm:text-sm font-bold text-text-primary">
                       Klip Hasil Render ({clips.length})
                     </h4>
@@ -269,7 +269,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
                       onResume(job.id);
                     }
                   }}
-                  className="flex items-center px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition-all shadow-sm"
+                  className="flex items-center px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm"
                 >
                   <Play className="w-3.5 h-3.5 mr-1.5" />
                   {job.status === "AWAITING_MANUAL" ? "Edit Prompt / JSON" : "Rerun from JSON"}
@@ -279,7 +279,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
               {isError && (
                 <button
                   onClick={() => onResume(job.id)}
-                  className="flex items-center px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition-colors shadow-sm"
+                  className="flex items-center px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-sm"
                 >
                   <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
                   Retry
@@ -295,7 +295,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
                   }}
                   className="flex items-center px-3.5 py-2 text-xs sm:text-sm font-semibold text-text-secondary bg-bg-surface hover:bg-slate-200 border border-border rounded-xl transition-colors"
                 >
-                  <Film className="w-3.5 h-3.5 mr-1.5 text-purple-600" />
+                  <Film className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
                   Rerender All
                 </button>
               )}
@@ -310,7 +310,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
                   }}
                   className="flex items-center px-3.5 py-2 text-xs sm:text-sm font-semibold text-text-secondary bg-bg-surface hover:bg-slate-200 border border-border rounded-xl transition-colors"
                 >
-                  <Sparkles className="w-3.5 h-3.5 mr-1.5 text-purple-600" />
+                  <Sparkles className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
                   AI Correct
                 </button>
               )}
@@ -355,7 +355,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
                   <button
                     onClick={() => handleRerenderSubmit(job.id)}
                     disabled={isSubmittingPanel}
-                    className="w-full py-2.5 sm:py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 text-xs sm:text-sm"
+                    className="w-full py-2.5 sm:py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 text-xs sm:text-sm"
                   >
                     {isSubmittingPanel ? "Submitting..." : "Submit Rerender All"}
                   </button>
@@ -372,13 +372,13 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
                   value={extraPrompt}
                   onChange={(e) => setExtraPrompt(e.target.value)}
                   placeholder="E.g. Focus more on the funny moments..."
-                  className="w-full bg-white border border-border rounded-xl p-3 text-xs sm:text-sm text-text-primary mb-3 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full bg-white border border-border rounded-xl p-3 text-xs sm:text-sm text-text-primary mb-3 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   rows={3}
                 />
                 <button
                   onClick={() => handleAiCorrectSubmit(job.id)}
                   disabled={isSubmittingPanel || !extraPrompt.trim()}
-                  className="w-full py-2.5 sm:py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 text-xs sm:text-sm"
+                  className="w-full py-2.5 sm:py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 text-xs sm:text-sm"
                 >
                   {isSubmittingPanel ? "Submitting..." : "Submit AI Correction"}
                 </button>

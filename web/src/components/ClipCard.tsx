@@ -41,7 +41,7 @@ export const ClipCard: React.FC<ClipCardProps> = ({
   );
 
   return (
-    <div className="w-[260px] sm:w-72 shrink-0 snap-start bg-white border border-border rounded-2xl p-3 sm:p-4 flex flex-col gap-3 shadow-sm hover:shadow-md hover:border-purple-200 transition-all">
+    <div className="w-[260px] sm:w-72 shrink-0 snap-start bg-white border border-border rounded-2xl p-3 sm:p-4 flex flex-col gap-3 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all">
       {/* Video Preview */}
       <div className="aspect-[9/16] bg-slate-900 rounded-xl overflow-hidden border border-border/50 relative">
         <video
@@ -61,8 +61,8 @@ export const ClipCard: React.FC<ClipCardProps> = ({
             {title}
           </h4>
           {clip.score && (
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold shrink-0">
-              <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold shrink-0">
+              <Star className="w-3 h-3 fill-emerald-500 text-emerald-500" />
               <span>{clip.score}/10</span>
             </div>
           )}
@@ -76,7 +76,7 @@ export const ClipCard: React.FC<ClipCardProps> = ({
           <div className="mb-3">
             <button
               onClick={onOpenSocialKit}
-              className="w-full py-1.5 px-3 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              className="w-full py-1.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Social Kit</span>
@@ -89,7 +89,7 @@ export const ClipCard: React.FC<ClipCardProps> = ({
           {onEditSubtitle && (
             <button
               onClick={onEditSubtitle}
-              className="flex-1 py-2 px-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+              className="flex-1 py-2 px-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
               title="Correct Subtitle & Rerender"
             >
               <Pencil className="w-3.5 h-3.5" />

@@ -3,7 +3,7 @@ import os
 import json
 from datetime import datetime
 import sys
-from backend.logger import log_error
+from utils.logger import log_error
 
 def get_app_data_dir() -> str:
     custom_ws = os.environ.get("AUTO_CLIPPER_WORKSPACE", "").strip()
@@ -248,7 +248,7 @@ def delete_history(job_id: str):
 
         # 3. Bersihkan direktori project workspace jika tidak dipakai job lain
         try:
-            from backend.jobs import get_project_workspace
+            from services.jobs.orchestrator import get_project_workspace
             meta_dict = json.loads(row["metadata"]) if row["metadata"] else {}
             ws = get_project_workspace(meta_dict.get("title", ""), meta_dict.get("output_dir", ""), job_id)
             project_ws = ws.get("project_dir")

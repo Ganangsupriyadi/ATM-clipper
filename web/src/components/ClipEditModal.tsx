@@ -159,7 +159,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
           {loading ? (
             <div className="flex items-center justify-center py-10">
-              <RefreshCcw className="w-6 h-6 text-purple-600 animate-spin" />
+              <RefreshCcw className="w-6 h-6 text-emerald-600 animate-spin" />
             </div>
           ) : (
             <>
@@ -168,7 +168,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
                   onClick={() => setIsAiAssistantOpen(!isAiAssistantOpen)}
                   className="w-full flex items-center justify-between p-4 bg-bg-surface/60 hover:bg-bg-surface transition-colors"
                 >
-                  <div className="flex items-center gap-2 text-purple-600 font-semibold text-sm">
+                  <div className="flex items-center gap-2 text-emerald-600 font-semibold text-sm">
                     <Wand2 className="w-4 h-4" /> AI Auto Correction
                   </div>
                   <ChevronRight className={`w-4 h-4 text-text-tertiary transition-transform ${isAiAssistantOpen ? 'rotate-90' : ''}`} />
@@ -180,7 +180,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-text-secondary">1. Generate & Copy Prompt</span>
-                          <button onClick={copyToClipboard} className="flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:text-purple-700 transition-colors">
+                          <button onClick={copyToClipboard} className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
                             {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                             {isCopied ? 'Copied!' : 'Copy'}
                           </button>
@@ -199,7 +199,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
                           value={pasteInput}
                           onChange={(e) => setPasteInput(e.target.value)}
                           placeholder='[{"word": "Hello", "start": 0.0, "end": 0.5}]'
-                          className="w-full h-32 bg-bg-surface/50 border border-border rounded-xl p-3 text-xs text-text-primary font-mono resize-none focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/10 focus:outline-none"
+                          className="w-full h-32 bg-bg-surface/50 border border-border rounded-xl p-3 text-xs text-text-primary font-mono resize-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 focus:outline-none"
                         />
                         <button 
                           onClick={applyManualJSON}
@@ -221,7 +221,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
                     {hasChanges && (
                       <button
                         onClick={handleReset}
-                        className="flex items-center gap-1 text-xs text-text-tertiary hover:text-purple-600 transition-colors"
+                        className="flex items-center gap-1 text-xs text-text-tertiary hover:text-emerald-600 transition-colors"
                         title="Reset changes"
                       >
                         <RotateCcw className="w-3.5 h-3.5" /> Reset
@@ -234,10 +234,10 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search word..."
-                        className="bg-bg-surface/60 border border-border rounded-xl pl-9 pr-3 py-1.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/10 outline-none"
+                        className="bg-bg-surface/60 border border-border rounded-xl pl-9 pr-3 py-1.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 outline-none"
                       />
                     </div>
-                    <span className="text-xs bg-purple-50 text-purple-700 border border-purple-100 px-2.5 py-1 rounded-lg font-medium">
+                    <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-lg font-medium">
                       {words.length} words
                     </span>
                   </div>
@@ -262,9 +262,9 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
                             value={w.word}
                             onChange={e => handleWordChange(idx, e.target.value)}
                             className={`border rounded-xl px-2.5 py-1.5 text-sm text-text-primary focus:outline-none transition-all ${
-                              isMatch ? 'border-purple-500 bg-purple-50 text-purple-900 ring-2 ring-purple-500/20' :
-                              isChanged ? 'border-amber-400 bg-amber-50 text-amber-900' :
-                              'bg-bg-surface/40 border-border hover:border-slate-300 focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10'
+                              isMatch ? 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-500/20' :
+                              isChanged ? 'border-emerald-400 bg-emerald-50 text-emerald-900' :
+                              'bg-bg-surface/40 border-border hover:border-slate-300 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10'
                             }`}
                           />
                         </div>
@@ -296,7 +296,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
                         disabled={saving}
                         className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
                           trackingMode === "auto"
-                            ? "border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500/30"
+                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
                             : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                         } disabled:opacity-50`}
                       >
@@ -308,7 +308,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
                         disabled={saving}
                         className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
                           trackingMode === "center"
-                            ? "border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500/30"
+                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
                             : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                         } disabled:opacity-50`}
                       >
@@ -329,7 +329,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
                           disabled={saving}
                           className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
                             faceTrackingEngine === "haar"
-                              ? "border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500/30"
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
                               : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                           } disabled:opacity-50`}
                         >
@@ -342,7 +342,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
                           disabled={saving}
                           className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
                             faceTrackingEngine === "mediapipe"
-                              ? "border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500/30"
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
                               : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                           } disabled:opacity-50`}
                         >
@@ -390,7 +390,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
           <button 
             onClick={handleSaveRerender} 
             disabled={saving || loading}
-            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow-sm transition-all flex items-center gap-2"
+            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-sm transition-all flex items-center gap-2"
           >
             {saving && <RefreshCcw className="w-4 h-4 animate-spin" />}
             Save & Rerender

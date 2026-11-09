@@ -62,7 +62,7 @@ export const GDriveBrowserModal: React.FC<{
       <div className="w-full max-w-2xl bg-white border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
         <div className="flex items-center justify-between p-5 border-b border-border bg-white">
           <div className="flex items-center gap-2.5">
-            <HardDrive className="w-5 h-5 text-purple-600" />
+            <HardDrive className="w-5 h-5 text-emerald-600" />
             <h3 className="font-semibold text-text-primary text-base">Browse Google Drive</h3>
           </div>
           <button type="button" onClick={onClose} className="p-1.5 text-text-tertiary hover:text-text-primary rounded-xl hover:bg-slate-100 transition-colors">
@@ -88,7 +88,7 @@ export const GDriveBrowserModal: React.FC<{
         <div className="flex-1 overflow-y-auto p-3 bg-white">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-purple-600/30 border-t-purple-600 rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-emerald-600/30 border-t-emerald-600 rounded-full animate-spin" />
             </div>
           ) : error ? (
             <div className="text-center py-12 text-red-500 text-sm">{error}</div>
@@ -110,9 +110,9 @@ export const GDriveBrowserModal: React.FC<{
                   className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 border border-transparent hover:border-border rounded-xl transition-all group"
                 >
                   {item.is_dir ? (
-                    <Folder className="w-5 h-5 text-purple-600 group-hover:text-purple-700 flex-shrink-0" />
+                    <Folder className="w-5 h-5 text-emerald-600 group-hover:text-emerald-700 flex-shrink-0" />
                   ) : (
-                    <FileVideo className="w-5 h-5 text-pink-500 group-hover:text-pink-600 flex-shrink-0" />
+                    <FileVideo className="w-5 h-5 text-emerald-500 group-hover:text-emerald-600 flex-shrink-0" />
                   )}
                   <span className="text-sm font-medium text-text-primary truncate">{item.name}</span>
                 </button>
