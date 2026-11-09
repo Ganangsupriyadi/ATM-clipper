@@ -1,12 +1,19 @@
 import type { CreateJobPayload, JobResponse } from "./types/job";
 
-export const API_URL =
-  import.meta.env.VITE_API_URL ||
-  (typeof window !== "undefined" &&
-    (localStorage.getItem("AUTO_CLIPPER_API_URL") ||
-      localStorage.getItem("ac_api_url"))) ||
-  "https://royalty-subdivision-reggae-dictionary.trycloudflare.com/";
+function getBaseUrl() {
+  if (typeof window !== "undefined") {
+    // Cari URL dari Console dengan nama key 'api_url' (biar gampang)
+    let savedUrl = localStorage.getItem("api_url") || "";
+    // Hapus garis miring di ujung kalau nggak sengaja ketulis
+    if (savedUrl.endsWith("/")) {
+      savedUrl = savedUrl.slice(0, -1);
+    }
+    if (savedUrl) return savedUrl;
+  }
+  return import.meta.env.VITE_API_URL || "http://localhost:8000";
+}
 
+export const API_URL = getBaseUrl();
 export const STORAGE_AUTH_KEY = "AUTO_CLIPPER_WEB_TOKEN";
 export const STORAGE_AUTH_LEGACY_KEY = "ac_web_token";
 
