@@ -674,6 +674,32 @@ def api_create_job(req: CreateJobRequest):
 
     from jobs import create_job
     canvas_cfg = req.canvas_config.model_dump() if req.canvas_config else None
+from fastapi import BackgroundTasks
+# ... di dalam handler ...
+@app.post("/jobs", status_code=202)
+def api_create_job(req: CreateJobRequest):
+    if not req.url:
+        return JSONResponse(status_code=400, content={"status": "error", "message": "URL is required"})
+
+    if not req.title or not req.title.strip():
+        return JSONResponse(status_code=400, content={"status": "error", "message": "Judul Proyek wajib diisi."})
+
+    if not is_valid_source_url(req.url):
+        return JSONResponse(status_code=400, content={"status": "error", "message": "URL tidak valid. Didukung: YouTube, TikTok, Instagram, X/Twitter, atau upload file lokal."})
+
+    from services.jobs import create_job
+    canvas_cfg = req.canvas_config.model_dump() if req.canvas_config else None
+    
+    job_id = create_job(
+        req.url.strip(), req.provider, req.api_key.strip(),
+        req.aspect_ratio, req.caption_style, req.burn_subs, req.output_dir, req.quality,
+        req.title.strip(), req.enable_broll, req.pexels_api_key.strip(), req.max_clips,
+        req.custom_base_url.strip(), req.custom_model_name.strip(), req.is_gaming_video,
+        req.whisper_model, req.model, canvas_config=canvas_cfg, subtitle_config=req.subtitle_config,
+        tracking_mode=req.tracking_mode, enable_hook=req.enable_hook
+    )
+    return {"status": "success", "job_id": job_id}
+
     job_id = create_job(
         req.url.strip(), req.provider, req.api_key.strip(),
         req.aspect_ratio, req.caption_style, req.burn_subs, req.output_dir, req.quality,
