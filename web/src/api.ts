@@ -71,7 +71,7 @@ export async function apiFetch<T = any>(
     : `${API_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
   const headers = new Headers(options.headers || {});
-  headers.set("ngrok-skip-browser-warning", "69420");
+  headers.set("ngrok-skip-browser-warning", "true");
   
   if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
