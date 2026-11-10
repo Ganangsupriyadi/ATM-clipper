@@ -85,64 +85,16 @@ init_db()
 
 app = FastAPI(title="ATM Clipper")
 
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    log_error(f"FastAPI Unhandled [{request.method} {request.url.path}]", exc)
-    return JSONResponse(
-        status_code=500,
-        content={"status": "error", "message": f"Internal Server Error: {str(exc)}"}
-    )
-
-cors_regex = r"https?://([a-zA-Z0-9_.-]+\.)?localhost(:\d+)?|https?://127\.0\.0\.1(:\d+)?|tauri://.*|app://.*|https://clipper\.dhims\.web\.id|https://.*\.vercel\.app"
-custom_cors = os.environ.get("AUTO_CLIPPER_CORS_ORIGIN", "").strip()
-if custom_cors:
-    if custom_cors == "*":
-        cors_regex = r".*"
-    else:
-        custom_parts = [re.escape(orig.strip()) for orig in custom_cors.split(",") if orig.strip()]
-        if custom_parts:
-            cors_regex += "|" + "|".join(custom_parts)
-
 app.add_middleware(
     CORSMiddleware,
-    # Allow local dev and all variations of Tauri custom protocols (including tauri.localhost on Windows), plus cloud web app
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-@app.middleware("http")
-async def add_cors_header(request: Request, call_next):
-    response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    return response
 
+# Middleware disabled for cloud mode
 
-
-@app.middleware("http")
-async def verify_token(request: Request, call_next):
-    # Biarkan endpoint tertentu tanpa token (video player tidak bisa mengirim header dengan mudah)
-    path = request.url.path
-    if request.method == "OPTIONS" or path.startswith("/video") or path in ["/health", "/heartbeat"]:
-        return await call_next(request)
-        
-    # Enforce token verification in frozen bundles or cloud mode
-    cloud_mode = bool(os.environ.get("AUTO_CLIPPER_CLOUD_MODE"))
-    if not getattr(sys, 'frozen', False) and not cloud_mode:
-        return await call_next(request)
-        
-    # In cloud mode, allow requests smoothly to prevent 401 CORS false-positives
-    if cloud_mode:
-        return await call_next(request)
-        
-    auth_header = request.headers.get("Authorization")
-    token = os.environ.get("AUTO_CLIPPER_WEB_TOKEN") or os.environ.get("AUTO_CLIPPER_DEV_TOKEN") or API_SECRET_TOKEN
-    if not auth_header or auth_header != f"Bearer {token}":
-        return JSONResponse(status_code=401, content={"status": "error", "message": "Unauthorized API access"})
-        
-    return await call_next(request)
 
 @app.post("/upload")
 def api_upload_video(file: UploadFile = File(...)):
