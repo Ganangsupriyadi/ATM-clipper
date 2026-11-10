@@ -7,7 +7,7 @@ import sys
 import time
 import shutil
 from pathlib import Path
-from logger import log_error
+from utils.logger import log_error
 
 
 def get_ffmpeg_path() -> str | None:

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from crop_utils import build_canvas_background_filter, crop_to_vertical, srt_to_ass, words_to_single_word_ass
+from services.camera.crop_utils import build_canvas_background_filter, crop_to_vertical, srt_to_ass, words_to_single_word_ass
 
 
 def test_build_canvas_background_filter_blur():

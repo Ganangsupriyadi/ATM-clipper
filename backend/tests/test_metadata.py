@@ -1,4 +1,4 @@
-from metadata import parse_silence
+from schemas.metadata import parse_silence
 from fastapi.testclient import TestClient
 from main import app
 

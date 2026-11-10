@@ -4,7 +4,7 @@ import re
 import subprocess
 import traceback
 import math
-from logger import log_error, log_app
+from utils.logger import log_error, log_app
 
 FONTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts')
 

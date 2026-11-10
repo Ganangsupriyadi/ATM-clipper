@@ -5,9 +5,9 @@ import traceback
 import os
 from services.rendering.video_utils import download_youtube_video
 from services.ai_utils import process_with_openai, process_with_gemini, process_with_openai_compatible, OPENAI_COMPAT_PROVIDERS
-from crop_utils import crop_to_vertical
-from db import save_history, get_app_data_dir
-from logger import log_app, log_error
+from services.camera.crop_utils import crop_to_vertical
+from services.jobs.db import save_history, get_app_data_dir
+from utils.logger import log_app, log_error
 
 active_jobs = {}
 def _get_clip_limit(max_clips: int, duration_seconds: float) -> int:
@@ -45,7 +45,7 @@ def check_title_uniqueness(title: str):
             from fastapi import HTTPException
             raise HTTPException(status_code=400, detail=f"Judul Proyek '{title}' sudah digunakan oleh proses yang sedang berjalan. Silakan gunakan judul yang berbeda.")
             
-    from db import get_all_history
+    from services.jobs.db import get_all_history
     for row in get_all_history():
         meta = row.get("metadata", {})
         if meta and sanitize_title(meta.get("title", "")).lower() == safe_title:
@@ -244,7 +244,7 @@ def create_rerender_job(history_id: str, aspect_ratio: str, burn_subs: bool, out
     if is_any_job_running():
         from fastapi import HTTPException
         raise HTTPException(status_code=409, detail="Ada proses lain yang sedang berjalan. Harap tunggu hingga selesai.")
-    from db import get_history
+    from services.jobs.db import get_history
     hist = get_history(history_id)
     if not hist or not hist.get("metadata") or not hist["metadata"].get("source_video"):
         raise ValueError("History tidak valid atau metadata tidak lengkap.")
@@ -284,7 +284,7 @@ def create_rerender_job(history_id: str, aspect_ratio: str, burn_subs: bool, out
 def get_job(job_id: str) -> dict:
     job = active_jobs.get(job_id)
     if not job:
-        from db import get_history
+        from services.jobs.db import get_history
         hist = get_history(job_id)
         if hist:
             meta = hist.get("metadata", {}) or {}
@@ -332,7 +332,7 @@ def cancel_job(job_id: str):
                 log_error("jobs.cancel_job", e)
         # Immediately record CANCELLED in DB
         try:
-            from db import save_history
+            from services.jobs.db import save_history
             save_history(job_id, job.get("url", ""), "CANCELLED", job.get("clips", []), job.get("metadata"))
         except Exception as e:
             log_error("jobs.cancel_job_db", e)
@@ -354,7 +354,7 @@ def _run_job(job_id: str):
         job["status"] = "DOWNLOADING"
         log_app(f"[{job_id}] " + str("DOWNLOADING"))
         try:
-            from db import save_history
+            from services.jobs.db import save_history
             save_history(job_id, job["url"], "DOWNLOADING", job["clips"], metadata)
         except Exception as db_e:
             log_error("jobs.downloading_save_history", db_e)
@@ -404,7 +404,7 @@ def _run_job(job_id: str):
         job["progress"] = f"Menganalisis video dengan {job['provider']}..."
         log_app(f"[{job_id}] " + str(f"Menganalisis video dengan {job['provider']}..."))
         try:
-            from db import save_history
+            from services.jobs.db import save_history
             save_history(job_id, job["url"], "TRANSCRIBING", job["clips"], metadata)
         except Exception as db_e:
             log_error("jobs.transcribing_save_history", db_e)
@@ -498,14 +498,14 @@ def _render_video_clips(job: dict, job_id: str, metadata: dict, output_path: str
     job["status"] = "CROPPING"
     log_app(f"[{job_id}] " + str("CROPPING"))
     try:
-        from db import save_history
+        from services.jobs.db import save_history
         save_history(job_id, job.get("url", ""), "CROPPING", job.get("clips", []), metadata)
     except Exception as db_e:
         log_error("jobs.initial_cropping_save_history", db_e)
     
     ws = get_project_workspace(job.get("title", ""), job.get("output_dir", ""), job_id)
     try:
-        from crop_utils import to_seconds
+        from services.camera.crop_utils import to_seconds
         highlights = metadata.get("highlights", [])
         highlights.sort(key=lambda x: to_seconds(x.get("start_time", "00:00:00")))
     except Exception as e:
@@ -519,7 +519,7 @@ def _render_video_clips(job: dict, job_id: str, metadata: dict, output_path: str
     job_layout = None
     if job.get("aspect_ratio") == "9:16" and job.get("is_gaming_video"):
         try:
-            from crop_utils import detect_video_layout
+            from services.camera.crop_utils import detect_video_layout
             job_layout = detect_video_layout(output_path, should_cancel=is_cancelled)
         except Exception as e:
             log_error(f"Failed to detect video layout: {e}")
@@ -633,7 +633,7 @@ def _render_video_clips(job: dict, job_id: str, metadata: dict, output_path: str
             })
             
             try:
-                from db import save_history
+                from services.jobs.db import save_history
                 save_history(job_id, job.get("url", ""), "CROPPING", job["clips"], metadata)
             except Exception as db_e:
                 log_error("save_history_in_loop", db_e)
@@ -679,7 +679,7 @@ def _run_manual_job(job_id: str):
         job["status"] = "DOWNLOADING"
         log_app(f"[{job_id}] " + str("DOWNLOADING"))
         try:
-            from db import save_history
+            from services.jobs.db import save_history
             save_history(job_id, job["url"], "DOWNLOADING", job["clips"], metadata)
         except Exception as db_e:
             log_error("jobs.manual_downloading_save_history", db_e)
@@ -706,7 +706,7 @@ def _run_manual_job(job_id: str):
         clips = job.get("manual_clips", [])
         if not clips:
             from services.rendering.video_utils import get_video_duration
-            from crop_utils import _fmt_srt_ts
+            from services.camera.crop_utils import _fmt_srt_ts
             dur_secs = get_video_duration(source_path)
             clips = [{"start": "00:00:00.000", "end": _fmt_srt_ts(dur_secs)}]
 
@@ -722,7 +722,7 @@ def _run_manual_job(job_id: str):
             job["progress"] = "Membuat subtitle otomatis..."
             log_app(f"[{job_id}] " + str("Membuat subtitle otomatis..."))
             try:
-                from db import save_history
+                from services.jobs.db import save_history
                 save_history(job_id, job["url"], "TRANSCRIBING", job["clips"], metadata)
             except Exception as db_e:
                 log_error("jobs.manual_transcribing_save_history", db_e)
@@ -742,7 +742,7 @@ def _run_manual_job(job_id: str):
         job_layout = None
         if job.get("aspect_ratio") == "9:16" and job.get("is_gaming_video"):
             try:
-                from crop_utils import detect_video_layout
+                from services.camera.crop_utils import detect_video_layout
                 job_layout = detect_video_layout(source_path)
             except Exception as e:
                 log_error(f"Failed to detect video layout (manual): {e}")
@@ -752,7 +752,7 @@ def _run_manual_job(job_id: str):
         job["status"] = "CROPPING"
         log_app(f"[{job_id}] " + str("CROPPING"))
         try:
-            from db import save_history
+            from services.jobs.db import save_history
             save_history(job_id, job["url"], "CROPPING", job["clips"], metadata)
         except Exception as db_e:
             log_error("jobs.manual_cropping_save_history", db_e)
@@ -800,7 +800,7 @@ def _run_manual_job(job_id: str):
                 })
                 
                 try:
-                    from db import save_history
+                    from services.jobs.db import save_history
                     save_history(job_id, job.get("url", ""), "CROPPING", job["clips"], metadata)
                 except Exception as db_e:
                     log_error("save_history_in_loop", db_e)
@@ -856,7 +856,7 @@ def _run_rerender_job(job_id: str):
         log_app(f"[{job_id}] " + str("CROPPING"))
         
         try:
-            from crop_utils import to_seconds
+            from services.camera.crop_utils import to_seconds
             highlights.sort(key=lambda x: to_seconds(x.get("start_time", "00:00:00")))
         except Exception as e:
             log_error("jobs.rerender_sort_highlights", e)
@@ -872,7 +872,7 @@ def _run_rerender_job(job_id: str):
         job_layout = None
         if job.get("aspect_ratio") == "9:16" and job.get("is_gaming_video"):
             try:
-                from crop_utils import detect_video_layout
+                from services.camera.crop_utils import detect_video_layout
                 job_layout = detect_video_layout(output_path)
             except Exception as e:
                 log_error(f"Failed to detect video layout (rerender): {e}")
@@ -993,7 +993,7 @@ def _run_rerender_job(job_id: str):
                 })
                 
                 try:
-                    from db import save_history
+                    from services.jobs.db import save_history
                     save_history(job_id, job.get("url", ""), "CROPPING", job["clips"], metadata)
                 except Exception as db_e:
                     log_error("save_history_in_loop", db_e)
@@ -1030,7 +1030,7 @@ def create_rerun_ai_job(history_job_id: str, provider: str, api_key: str, aspect
     if is_any_job_running():
         from fastapi import HTTPException
         raise HTTPException(status_code=409, detail="Ada proses lain yang sedang berjalan. Harap tunggu hingga selesai.")
-    from db import get_history
+    from services.jobs.db import get_history
     job_record = get_history(history_job_id)
     if not job_record:
         raise ValueError("History job not found")
@@ -1073,7 +1073,7 @@ def create_rerun_ai_job(history_job_id: str, provider: str, api_key: str, aspect
         "metadata_ref": metadata
     }
     try:
-        from db import save_history
+        from services.jobs.db import save_history
         save_history(new_job_id, job_record.get("url", "local:"), "QUEUED", [], metadata)
     except Exception as db_e:
         log_error("jobs.create_rerun_ai_job_save_history", db_e)
@@ -1097,7 +1097,7 @@ def _run_rerun_ai_job(job_id: str, source_video: str, old_metadata: dict):
         job["progress"] = f"Menganalisis ulang dengan {job['provider']}..."
         log_app(f"[{job_id}] " + str(f"Menganalisis ulang dengan {job['provider']}..."))
         try:
-            from db import save_history
+            from services.jobs.db import save_history
             save_history(job_id, job["url"], "TRANSCRIBING", job["clips"], metadata)
         except Exception as db_e:
             log_error("jobs.rerun_transcribing_save_history", db_e)
@@ -1138,13 +1138,13 @@ def _run_rerun_ai_job(job_id: str, source_video: str, old_metadata: dict):
         job["status"] = "CROPPING"
         log_app(f"[{job_id}] " + str("CROPPING"))
         try:
-            from db import save_history
+            from services.jobs.db import save_history
             save_history(job_id, job["url"], "CROPPING", job["clips"], metadata)
         except Exception as db_e:
             log_error("jobs.rerun_cropping_save_history", db_e)
         
         try:
-            from crop_utils import to_seconds
+            from services.camera.crop_utils import to_seconds
             highlights.sort(key=lambda x: to_seconds(x.get("start_time", "00:00:00")))
         except Exception as e:
             log_error("jobs.rerun_sort_highlights", e)
@@ -1154,7 +1154,7 @@ def _run_rerun_ai_job(job_id: str, source_video: str, old_metadata: dict):
         job_layout = None
         if job.get("aspect_ratio") == "9:16" and job.get("is_gaming_video"):
             try:
-                from crop_utils import detect_video_layout
+                from services.camera.crop_utils import detect_video_layout
                 job_layout = detect_video_layout(source_video)
             except Exception as e:
                 log_error("jobs.rerun_detect_layout", e)
@@ -1217,7 +1217,7 @@ def _run_rerun_ai_job(job_id: str, source_video: str, old_metadata: dict):
                 })
                 
                 try:
-                    from db import save_history
+                    from services.jobs.db import save_history
                     save_history(job_id, job.get("url", ""), "CROPPING", job["clips"], metadata)
                 except Exception as db_e:
                     log_error("save_history_in_loop", db_e)
@@ -1295,7 +1295,7 @@ def _run_rerender_clip_job(new_job_id: str):
         job["progress"] = "Preparing custom subtitle..."
 
         # Inline import — consistent with resume_manual_job pattern
-        from db import get_history
+        from services.jobs.db import get_history
 
         history_data = get_history(parent_job_id)
         if not history_data:
@@ -1333,7 +1333,7 @@ def _run_rerender_clip_job(new_job_id: str):
         job_layout = None
         if job["aspect_ratio"] == "9:16" and metadata.get("is_gaming_video"):
             try:
-                from crop_utils import detect_video_layout
+                from services.camera.crop_utils import detect_video_layout
                 job_layout = detect_video_layout(source_path)
             except Exception:
                 job_layout = None
@@ -1482,7 +1482,7 @@ def _finalize_job(job_id: str, status: str, metadata: dict = None):
 
     if status in ["DONE", "ERROR", "CANCELLED", "AWAITING_MANUAL"]:
         try:
-            from db import save_history
+            from services.jobs.db import save_history
             save_history(job_id, job["url"], status, job["clips"], metadata)
         except Exception as e:
             log_error("jobs.save_history", e)
@@ -1492,7 +1492,7 @@ def resume_manual_job(history_id: str, json_payload: str) -> str:
     if is_any_job_running():
         from fastapi import HTTPException
         raise HTTPException(status_code=409, detail="Ada proses lain yang sedang berjalan. Harap tunggu hingga selesai.")
-    from db import get_history
+    from services.jobs.db import get_history
     hist = get_history(history_id)
     if not hist or not hist.get("metadata"):
         raise ValueError("Histori pekerjaan tidak valid.")
@@ -1531,7 +1531,7 @@ def resume_manual_job(history_id: str, json_payload: str) -> str:
         "source_path": hist_meta["source_video"]
     }
     try:
-        from db import save_history
+        from services.jobs.db import save_history
         save_history(job_id, hist["url"], "PENDING", hist.get("result_clips", []), hist_meta)
     except Exception as db_e:
         log_error("jobs.resume_manual_job_save_history", db_e)
@@ -1551,7 +1551,7 @@ def _run_manual_resume_job(job_id: str, parsed_highlights: list):
     job = active_jobs[job_id]
     job["start_time"] = time.time()
     
-    from db import get_history
+    from services.jobs.db import get_history
     hist = get_history(job_id)
     metadata = hist.get("metadata", {})
     job["metadata"] = metadata
@@ -1586,7 +1586,7 @@ def create_resume_job(history_id: str, fallback_api_key: str = None, fallback_pr
     if is_any_job_running():
         from fastapi import HTTPException
         raise HTTPException(status_code=409, detail="Ada proses lain yang sedang berjalan. Harap tunggu hingga selesai.")
-    from db import get_history
+    from services.jobs.db import get_history
     hist = get_history(history_id)
     if not hist:
         raise ValueError("Histori pekerjaan tidak ditemukan.")
@@ -1637,7 +1637,7 @@ def create_resume_job(history_id: str, fallback_api_key: str = None, fallback_pr
         "metadata": hist_meta
     }
     try:
-        from db import save_history
+        from services.jobs.db import save_history
         save_history(job_id, hist["url"], "QUEUED", hist.get("result_clips", []), hist_meta)
     except Exception as db_e:
         log_error("jobs.create_resume_job_save_history", db_e)
@@ -1667,7 +1667,7 @@ def _run_resume_job(job_id: str):
                 job["progress"] = "Mengunduh ulang video sumber..."
                 log_app(f"[{job_id}] Mengunduh ulang video sumber...")
                 try:
-                    from db import save_history
+                    from services.jobs.db import save_history
                     save_history(job_id, job["url"], "DOWNLOADING", job["clips"], metadata)
                 except Exception as db_e:
                     log_error("jobs.resume_downloading_save_history", db_e)

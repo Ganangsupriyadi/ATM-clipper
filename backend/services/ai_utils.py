@@ -8,8 +8,8 @@ from google.genai import types
 from datetime import datetime as _dt, timezone as _tz
 
 from services.rendering.video_utils import extract_audio
-from crop_utils import to_seconds, _fmt_srt_ts
-from logger import log_ai, log_error, log_app
+from services.camera.crop_utils import to_seconds, _fmt_srt_ts
+from utils.logger import log_ai, log_error, log_app
 
 
 BROWSER_HEADERS = {
@@ -76,7 +76,7 @@ def _with_retry(fn, attempts: int = 4, base_delay: float = 2.0, is_cancelled = N
             if not _is_transient(e) or i == attempts - 1:
                 raise
             delay = base_delay * (2 ** i) + random.uniform(0, 0.5)
-            from logger import log_app
+            from utils.logger import log_app
             msg = getattr(e, "message", None) or str(e)
             log_app(f"AI API transient error: {msg}. Retrying in {delay:.2f}s (Attempt {i+1} of {attempts-1})")
             end_t = time.time() + delay
@@ -654,7 +654,7 @@ def transcribe_with_faster_whisper(audio_path: str, karaoke: bool = False, is_ca
             })
         return {"words": words_data, "segments": segments_data}
     else:
-        from crop_utils import _fmt_srt_ts
+        from services.camera.crop_utils import _fmt_srt_ts
         srt_lines = []
         for idx, segment in enumerate(segments, start=1):
             srt_lines.append(f"{idx}\n{_fmt_srt_ts(segment.start)} --> {_fmt_srt_ts(segment.end)}\n{segment.text.strip()}")
@@ -931,7 +931,7 @@ def ping_provider(provider: str, api_key: str, custom_base_url: str = None, cust
 
 def correct_subtitle_words_with_ai(words: list, provider: str, api_key: str, model: str = None, custom_base_url: str = None, custom_model_name: str = None) -> list:
     import json
-    from logger import log_ai, log_error
+    from utils.logger import log_ai, log_error
     
     prompt = (
         "You are a subtitle editor. Here is a JSON array of video subtitles. "

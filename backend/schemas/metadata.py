@@ -13,8 +13,8 @@ import threading
 import subprocess
 import math
 
-from db import get_app_data_dir
-from logger import log_error
+from services.jobs.db import get_app_data_dir
+from utils.logger import log_error
 
 # job_id -> {status, progress, silence, peaks, sprite, error, ...}
 metadata_jobs = {}

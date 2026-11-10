@@ -4,7 +4,7 @@ import sys
 import time
 
 from backend import jobs
-from crop_utils import crop_to_vertical
+from services.camera.crop_utils import crop_to_vertical
 
 
 def test_cancel_job_kills_running_process():

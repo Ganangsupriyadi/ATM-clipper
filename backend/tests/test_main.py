@@ -137,7 +137,7 @@ def test_history_list_ok():
 
 
 def test_video_missing_returns_404():
-    from db import get_app_data_dir
+    from services.jobs.db import get_app_data_dir
     import os
     missing_path = os.path.join(get_app_data_dir(), "nope.mp4")
     r = client.get("/video", params={"path": missing_path})

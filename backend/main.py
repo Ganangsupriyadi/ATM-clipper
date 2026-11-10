@@ -419,7 +419,7 @@ def api_rerun_ai_job(job_id: str, req: CreateJobRequest):
 @app.get("/jobs/{job_id}/clips/{clip_index}/words")
 async def get_clip_words(job_id: str, clip_index: int):
     from fastapi import HTTPException
-    from db import get_history
+    from services.jobs.db import get_history
     history = get_history(job_id)
     if not history:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -446,7 +446,7 @@ async def get_clip_words(job_id: str, clip_index: int):
         if not all_words:
             return {"words": [], "reason": "no_words_in_file"}
 
-        from crop_utils import to_seconds
+        from services.camera.crop_utils import to_seconds
         start_s = to_seconds(clip.get("start"))
         end_s = to_seconds(clip.get("end"))
 
@@ -460,7 +460,7 @@ async def get_clip_words(job_id: str, clip_index: int):
 
         return {"words": clip_words, "reason": None}
     except Exception as e:
-        from logger import log_error
+        from utils.logger import log_error
         log_error("get_clip_words", e)
         return {"words": [], "reason": "read_error"}
 class AICorrectSubtitleRequest(BaseModel):
@@ -704,7 +704,7 @@ def api_get_job(job_id: str):
 @app.post("/jobs/{job_id}/clips/{clip_index}/social")
 def api_generate_social_kit(job_id: str, clip_index: int, req: GenerateSocialKitRequest):
     from jobs import get_job
-    from db import get_history, save_history
+    from services.jobs.db import get_history, save_history
     from services.ai_utils import generate_social_kit_only
     
     job = get_job(job_id)
@@ -775,14 +775,14 @@ def api_extract_metadata(req: ExtractMetadataRequest):
         path = path.split("local:")[1]
     if not path or not os.path.exists(path):
         return JSONResponse(status_code=400, content={"status": "error", "message": "File tidak ditemukan."})
-    from metadata import create_metadata_job
+    from schemas.metadata import create_metadata_job
     job_id = create_metadata_job(path, req.type)
     return {"status": "success", "job_id": job_id}
 
 
 @app.get("/api/metadata/{job_id}")
 def api_get_metadata(job_id: str):
-    from metadata import get_metadata_job
+    from schemas.metadata import get_metadata_job
     job = get_metadata_job(job_id)
     if not job:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Job not found"})
@@ -809,7 +809,7 @@ def api_get_thumbnails(path: str, start: float = 0.0, end: float = 0.0, count: i
     if end <= start:
         return JSONResponse(status_code=400, content={"status": "error", "message": "Rentang waktu tidak valid."})
     try:
-        from metadata import generate_thumbnails_window
+        from schemas.metadata import generate_thumbnails_window
         uris = generate_thumbnails_window(p, start, end, count)
         return {"status": "success", "start": start, "end": end, "count": len(uris), "thumbnails": uris}
     except Exception as e:
@@ -863,7 +863,7 @@ def get_video(path: str, dl: int = 0, title: str = None):
     Restricted to existing .mp4 files. Starlette's
     FileResponse handles HTTP Range requests, so seeking works in the player.
     """
-    from logger import log_app
+    from utils.logger import log_app
     
     abs_path = os.path.normpath(os.path.abspath(path))
     

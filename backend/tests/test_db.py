@@ -1,5 +1,5 @@
 import os
-import db as db
+from services.jobs import db as db
 
 
 
