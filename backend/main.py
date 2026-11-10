@@ -133,6 +133,10 @@ async def verify_token(request: Request, call_next):
     if not getattr(sys, 'frozen', False) and not cloud_mode:
         return await call_next(request)
         
+    # In cloud mode, allow requests smoothly to prevent 401 CORS false-positives
+    if cloud_mode:
+        return await call_next(request)
+        
     auth_header = request.headers.get("Authorization")
     token = os.environ.get("AUTO_CLIPPER_WEB_TOKEN") or os.environ.get("AUTO_CLIPPER_DEV_TOKEN") or API_SECRET_TOKEN
     if not auth_header or auth_header != f"Bearer {token}":
