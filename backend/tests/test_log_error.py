@@ -25,7 +25,7 @@ def test_log_error_endpoint():
 
 def test_log_error_with_string_and_exception(tmp_path, monkeypatch):
     test_log = str(tmp_path / "test_error.log")
-    monkeypatch.setattr("backend.logger.get_error_log_path", lambda: test_log)
+    monkeypatch.setattr("utils.logger.get_error_log_path", lambda: test_log)
     
     # 1. Test string error
     log_error("test_context", "Something went wrong")
@@ -51,9 +51,9 @@ def test_get_log_content(tmp_path, monkeypatch):
     app_log = str(tmp_path / "test_app.log")
     error_log = str(tmp_path / "test_error.log")
     ai_log = str(tmp_path / "test_ai.log")
-    monkeypatch.setattr("backend.logger.get_app_log_path", lambda: app_log)
-    monkeypatch.setattr("backend.logger.get_error_log_path", lambda: error_log)
-    monkeypatch.setattr("backend.logger.get_ai_log_path", lambda: ai_log)
+    monkeypatch.setattr("utils.logger.get_app_log_path", lambda: app_log)
+    monkeypatch.setattr("utils.logger.get_error_log_path", lambda: error_log)
+    monkeypatch.setattr("utils.logger.get_ai_log_path", lambda: ai_log)
     
     # Empty / non-existent log
     assert get_log_content("app") == ""
