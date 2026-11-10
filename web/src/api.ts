@@ -10,7 +10,7 @@ function getBaseUrl() {
     }
     if (savedUrl) return savedUrl;
   }
-  return import.meta.env.VITE_API_URL || "https://tcp-bow-circle-away.trycloudflare.com";
+  return import.meta.env.VITE_API_URL || "https://a657994a653b9f.lhr.life";
 }
 
 export const API_URL = getBaseUrl();
