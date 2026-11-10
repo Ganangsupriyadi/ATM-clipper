@@ -10,7 +10,7 @@ function getBaseUrl() {
     }
     if (savedUrl) return savedUrl;
   }
-  return import.meta.env.VITE_API_URL || "http://localhost:8000";
+  return import.meta.env.VITE_API_URL || "https://tcp-bow-circle-away.trycloudflare.com";
 }
 
 export const API_URL = getBaseUrl();
