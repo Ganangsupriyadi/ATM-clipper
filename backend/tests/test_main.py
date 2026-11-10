@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from backend.main import app, is_valid_source_url
+from main import app, is_valid_source_url
 
 client = TestClient(app)
 
@@ -137,7 +137,7 @@ def test_history_list_ok():
 
 
 def test_video_missing_returns_404():
-    from backend.db import get_app_data_dir
+    from db import get_app_data_dir
     import os
     missing_path = os.path.join(get_app_data_dir(), "nope.mp4")
     r = client.get("/video", params={"path": missing_path})
@@ -174,7 +174,7 @@ def test_probe_endpoint_rejects_invalid_url():
 
 
 def test_create_job_request_has_no_manual_fields():
-    from backend.main import CreateJobRequest
+    from main import CreateJobRequest
     fields = CreateJobRequest.model_fields
     for gone in ("mode", "manual_start", "manual_end"):
         assert gone not in fields, f"{gone} should be removed from CreateJobRequest"

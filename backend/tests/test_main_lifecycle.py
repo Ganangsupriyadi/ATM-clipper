@@ -6,7 +6,7 @@ during OS sleep — only when the Tauri parent process is actually gone.
 """
 import os
 
-from backend.main import (
+from main import (
     is_parent_alive,
     check_watchdog_condition,
     HEARTBEAT_GRACE,

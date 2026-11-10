@@ -13,8 +13,8 @@ import threading
 import subprocess
 import math
 
-from backend.db import get_app_data_dir
-from backend.logger import log_error
+from db import get_app_data_dir
+from logger import log_error
 
 # job_id -> {status, progress, silence, peaks, sprite, error, ...}
 metadata_jobs = {}
@@ -217,7 +217,7 @@ def get_metadata_job(job_id: str) -> dict:
 
 
 def _run_metadata_job(job_id: str, video_path: str):
-    from backend.video_utils import get_video_duration
+    from services.rendering.video_utils import get_video_duration
     job = metadata_jobs[job_id]
     job["status"] = "RUNNING"
     types = job["types"]

@@ -4,7 +4,7 @@ import sys
 import time
 
 from backend import jobs
-from backend.crop_utils import crop_to_vertical
+from crop_utils import crop_to_vertical
 
 
 def test_cancel_job_kills_running_process():
@@ -78,14 +78,14 @@ def test_run_job_tracks_success_and_failed(tmp_path, monkeypatch):
 
 def test_create_job_has_no_manual_params():
     import inspect
-    from backend.jobs import create_job
+    from jobs import create_job
     params = inspect.signature(create_job).parameters
     for gone in ("mode", "manual_start", "manual_end"):
         assert gone not in params, f"{gone} should be removed from create_job"
 
 
 def test_get_project_workspace(tmp_path):
-    from backend.jobs import get_project_workspace
+    from jobs import get_project_workspace
     ws = get_project_workspace("Podcast / Radit: Ep 1?", output_dir=str(tmp_path))
     assert ws["safe_title"] == "Podcast  Radit Ep 1"
     assert os.path.exists(ws["source_dir"])
@@ -96,7 +96,7 @@ def test_get_project_workspace(tmp_path):
 
 def test_create_job_requires_title():
     import pytest
-    from backend.jobs import create_job, create_manual_job
+    from jobs import create_job, create_manual_job
     with pytest.raises(ValueError, match="Judul Proyek wajib diisi"):
         create_job("https://youtu.be/x", "openai", "key", title="")
     with pytest.raises(ValueError, match="Judul Proyek wajib diisi"):

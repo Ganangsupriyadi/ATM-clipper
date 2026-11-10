@@ -148,7 +148,7 @@ def api_probe(url: str):
     if not url or url.startswith("local:") or not is_valid_source_url(url):
         return JSONResponse(status_code=400, content={"status": "error", "message": "URL tidak valid untuk probing."})
     try:
-        from backend.video_utils import probe_formats
+        from services.rendering.video_utils import probe_formats
         return {"status": "success", "heights": probe_formats(url.strip())}
     except Exception as e:
         return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
@@ -278,7 +278,7 @@ class TestPexelsRequest(BaseModel):
 @app.post("/api/settings/test-pexels")
 def api_test_pexels(req: TestPexelsRequest):
     try:
-        from backend.broll import ping_pexels
+        from broll import ping_pexels
         ping_pexels(req.api_key.strip())
         return {"status": "success", "message": "Pexels API Key is valid!"}
     except Exception as e:
@@ -391,7 +391,7 @@ def api_open_folder(req: OpenFolderRequest):
 @app.post("/jobs/{job_id}/rerender")
 def api_rerender_job(job_id: str, req: CreateJobRequest):
     try:
-        from backend.jobs import create_rerender_job
+        from jobs import create_rerender_job
         canvas_cfg = req.canvas_config.model_dump() if req.canvas_config else None
         new_job_id = create_rerender_job(job_id, req.aspect_ratio, req.burn_subs, req.output_dir, req.max_clips, canvas_config=canvas_cfg, subtitle_config=req.subtitle_config, tracking_mode=req.tracking_mode, enable_hook=req.enable_hook)
         return {"status": "success", "job_id": new_job_id}
@@ -403,7 +403,7 @@ def api_rerun_ai_job(job_id: str, req: CreateJobRequest):
     try:
         from services.ai_utils import ping_provider
         ping_provider(req.provider, req.api_key.strip(), req.custom_base_url.strip(), req.custom_model_name.strip(), model=req.model.strip() if req.model else None)
-        from backend.jobs import create_rerun_ai_job
+        from jobs import create_rerun_ai_job
         canvas_cfg = req.canvas_config.model_dump() if req.canvas_config else None
         new_job_id = create_rerun_ai_job(
             job_id, req.provider, req.api_key.strip(),
@@ -419,7 +419,7 @@ def api_rerun_ai_job(job_id: str, req: CreateJobRequest):
 @app.get("/jobs/{job_id}/clips/{clip_index}/words")
 async def get_clip_words(job_id: str, clip_index: int):
     from fastapi import HTTPException
-    from backend.db import get_history
+    from db import get_history
     history = get_history(job_id)
     if not history:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -446,7 +446,7 @@ async def get_clip_words(job_id: str, clip_index: int):
         if not all_words:
             return {"words": [], "reason": "no_words_in_file"}
 
-        from backend.crop_utils import to_seconds
+        from crop_utils import to_seconds
         start_s = to_seconds(clip.get("start"))
         end_s = to_seconds(clip.get("end"))
 
@@ -460,7 +460,7 @@ async def get_clip_words(job_id: str, clip_index: int):
 
         return {"words": clip_words, "reason": None}
     except Exception as e:
-        from backend.logger import log_error
+        from logger import log_error
         log_error("get_clip_words", e)
         return {"words": [], "reason": "read_error"}
 class AICorrectSubtitleRequest(BaseModel):
@@ -502,7 +502,7 @@ class RerenderClipRequest(BaseModel):
 
 @app.post("/jobs/{job_id}/clips/{clip_index}/rerender")
 async def api_rerender_clip(job_id: str, clip_index: int, req: RerenderClipRequest):
-    from backend.jobs import create_rerender_clip_job
+    from jobs import create_rerender_clip_job
     new_job_id = create_rerender_clip_job(
         job_id=job_id,
         clip_index=clip_index,
@@ -530,7 +530,7 @@ class ResumeJobRequest(BaseModel):
 @app.post("/jobs/{job_id}/resume")
 def api_resume_job(job_id: str, req: ResumeJobRequest):
     try:
-        from backend.jobs import create_resume_job
+        from jobs import create_resume_job
         new_job_id = create_resume_job(
             job_id,
             fallback_api_key=req.api_key,
@@ -550,7 +550,7 @@ class ResumeManualJobRequest(BaseModel):
 @app.post("/jobs/{job_id}/resume-manual")
 def api_resume_manual_job(job_id: str, req: ResumeManualJobRequest):
     try:
-        from backend.jobs import resume_manual_job
+        from jobs import resume_manual_job
         new_job_id = resume_manual_job(job_id, req.json_payload)
         return {"status": "success", "job_id": new_job_id}
     except Exception as e:
@@ -672,7 +672,7 @@ def api_create_job(req: CreateJobRequest):
     except Exception as e:
         return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
 
-    from backend.jobs import create_job
+    from jobs import create_job
     canvas_cfg = req.canvas_config.model_dump() if req.canvas_config else None
     job_id = create_job(
         req.url.strip(), req.provider, req.api_key.strip(),
@@ -686,7 +686,7 @@ def api_create_job(req: CreateJobRequest):
 
 @app.get("/jobs/{job_id}")
 def api_get_job(job_id: str):
-    from backend.jobs import get_job
+    from jobs import get_job
     job = get_job(job_id)
     if not job:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Job not found"})
@@ -703,8 +703,8 @@ def api_get_job(job_id: str):
 
 @app.post("/jobs/{job_id}/clips/{clip_index}/social")
 def api_generate_social_kit(job_id: str, clip_index: int, req: GenerateSocialKitRequest):
-    from backend.jobs import get_job
-    from backend.db import get_history, save_history
+    from jobs import get_job
+    from db import get_history, save_history
     from services.ai_utils import generate_social_kit_only
     
     job = get_job(job_id)
@@ -742,7 +742,7 @@ def api_generate_social_kit(job_id: str, clip_index: int, req: GenerateSocialKit
 
 @app.post("/jobs/{job_id}/cancel")
 def api_cancel_job(job_id: str):
-    from backend.jobs import get_job, cancel_job
+    from jobs import get_job, cancel_job
     job = get_job(job_id)
     if not job:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Job not found"})
@@ -775,14 +775,14 @@ def api_extract_metadata(req: ExtractMetadataRequest):
         path = path.split("local:")[1]
     if not path or not os.path.exists(path):
         return JSONResponse(status_code=400, content={"status": "error", "message": "File tidak ditemukan."})
-    from backend.metadata import create_metadata_job
+    from metadata import create_metadata_job
     job_id = create_metadata_job(path, req.type)
     return {"status": "success", "job_id": job_id}
 
 
 @app.get("/api/metadata/{job_id}")
 def api_get_metadata(job_id: str):
-    from backend.metadata import get_metadata_job
+    from metadata import get_metadata_job
     job = get_metadata_job(job_id)
     if not job:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Job not found"})
@@ -809,7 +809,7 @@ def api_get_thumbnails(path: str, start: float = 0.0, end: float = 0.0, count: i
     if end <= start:
         return JSONResponse(status_code=400, content={"status": "error", "message": "Rentang waktu tidak valid."})
     try:
-        from backend.metadata import generate_thumbnails_window
+        from metadata import generate_thumbnails_window
         uris = generate_thumbnails_window(p, start, end, count)
         return {"status": "success", "start": start, "end": end, "count": len(uris), "thumbnails": uris}
     except Exception as e:
@@ -843,7 +843,7 @@ def api_create_manual_job(req: ManualJobRequest):
         return JSONResponse(status_code=400, content={"status": "error", "message": "URL tidak valid untuk klip manual."})
 
     try:
-        from backend.jobs import create_manual_job
+        from jobs import create_manual_job
         canvas_cfg = req.canvas_config.model_dump() if req.canvas_config else None
         job_id = create_manual_job(
             req.url.strip(), req.clips, req.aspect_ratio, req.caption_style,
@@ -863,7 +863,7 @@ def get_video(path: str, dl: int = 0, title: str = None):
     Restricted to existing .mp4 files. Starlette's
     FileResponse handles HTTP Range requests, so seeking works in the player.
     """
-    from backend.logger import log_app
+    from logger import log_app
     
     abs_path = os.path.normpath(os.path.abspath(path))
     

@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
-from backend.main import app
+from main import app
 import os
-from backend.logger import log_error, get_error_log_path, get_log_content, log_app, log_ai
+from logger import log_error, get_error_log_path, get_log_content, log_app, log_ai
 
 client = TestClient(app)
 
@@ -70,7 +70,7 @@ def test_get_log_content(tmp_path, monkeypatch):
 
 
 def test_logger_get_app_data_dir(monkeypatch, tmp_path):
-    from backend.logger import get_app_data_dir as logger_get_app_data_dir
+    from logger import get_app_data_dir as logger_get_app_data_dir
     custom_ws = str(tmp_path / "custom_logger_ws")
     monkeypatch.setenv("AUTO_CLIPPER_WORKSPACE", f"  {custom_ws}  ")
     res = logger_get_app_data_dir()

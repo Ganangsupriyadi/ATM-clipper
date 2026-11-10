@@ -1,5 +1,5 @@
 import re
-from backend.crop_utils import detect_primary_face_center, crop_to_vertical, srt_to_ass
+from crop_utils import detect_primary_face_center, crop_to_vertical, srt_to_ass
 from unittest.mock import patch, MagicMock
 
 
@@ -75,7 +75,7 @@ def test_crop_falls_back_when_subtitles_fail(mock_detect, mock_sample, mock_pope
 
 
 def test_build_crop_filter_ratios():
-    from backend.crop_utils import build_crop_filter
+    from crop_utils import build_crop_filter
     # Existing vertical/square ratios keep full height and crop width (unchanged).
     f916 = build_crop_filter("9:16", 0.5)
     assert f916 == "crop=trunc(ih*9/16/2)*2:ih:iw*0.5-ih*9/32:0"
@@ -92,7 +92,7 @@ def test_build_crop_filter_ratios():
 
 
 def test_output_width_ratios():
-    from backend.crop_utils import output_width
+    from crop_utils import output_width
     # Landscape output width == full source width.
     assert output_width("16:9", 1920, 1080) == 1920
     # Vertical/square derive width from source height (even).
@@ -108,7 +108,7 @@ def _fake_layout_cap(fps=30.0, frame_count=30):
     inst.isOpened.return_value = True
 
     def get(prop):
-        import backend.crop_utils as cu
+        import crop_utils as cu
         if prop == cu.cv2.CAP_PROP_FPS:
             return fps
         if prop == cu.cv2.CAP_PROP_FRAME_COUNT:
@@ -124,7 +124,7 @@ def _fake_layout_cap(fps=30.0, frame_count=30):
 @patch('backend.crop_utils.cv2.CascadeClassifier')
 @patch('backend.crop_utils.cv2.VideoCapture')
 def test_detect_video_layout_gaming_corner_face(mock_cap, mock_cascade, mock_cvt):
-    from backend.crop_utils import detect_video_layout
+    from crop_utils import detect_video_layout
     cascade = mock_cascade.return_value
     cascade.empty.return_value = False
     # Small facecam parked in the bottom-right corner.
@@ -143,7 +143,7 @@ def test_detect_video_layout_gaming_corner_face(mock_cap, mock_cascade, mock_cvt
 @patch('backend.crop_utils.cv2.CascadeClassifier')
 @patch('backend.crop_utils.cv2.VideoCapture')
 def test_detect_video_layout_standard_centered_face(mock_cap, mock_cascade, mock_cvt):
-    from backend.crop_utils import detect_video_layout
+    from crop_utils import detect_video_layout
     cascade = mock_cascade.return_value
     cascade.empty.return_value = False
     # Large, centred face (talking head / podcast).
@@ -160,7 +160,7 @@ def test_detect_video_layout_standard_centered_face(mock_cap, mock_cascade, mock
 @patch('backend.crop_utils.cv2.CascadeClassifier')
 @patch('backend.crop_utils.cv2.VideoCapture')
 def test_detect_video_layout_no_face(mock_cap, mock_cascade, mock_cvt):
-    from backend.crop_utils import detect_video_layout
+    from crop_utils import detect_video_layout
     cascade = mock_cascade.return_value
     cascade.empty.return_value = False
     cascade.detectMultiScale.return_value = []
@@ -174,7 +174,7 @@ def test_detect_video_layout_no_face(mock_cap, mock_cascade, mock_cvt):
 
 
 def test_build_split_screen_filter_9_16():
-    from backend.crop_utils import build_split_screen_filter
+    from crop_utils import build_split_screen_filter
     fc = build_split_screen_filter((0.8, 0.8, 0.1, 0.1), 1920, 1080, 606, 1080)
     assert fc is not None
     assert "vstack=inputs=2" in fc
@@ -183,7 +183,7 @@ def test_build_split_screen_filter_9_16():
 
 
 def test_build_split_screen_filter_none_without_box():
-    from backend.crop_utils import build_split_screen_filter
+    from crop_utils import build_split_screen_filter
     assert build_split_screen_filter(None, 1920, 1080, 606, 1080) is None
 
 
@@ -231,7 +231,7 @@ def test_crop_standard_layout_does_not_split(mock_dims, mock_popen):
 
 
 def test_words_to_single_word_ass_cumulative_and_continuous():
-    from backend.crop_utils import words_to_single_word_ass
+    from crop_utils import words_to_single_word_ass
     words = [
         {"word": "Halo", "start": 1.0, "end": 1.4},
         {"word": "semua", "start": 1.5, "end": 2.0},
@@ -252,7 +252,7 @@ def test_words_to_single_word_ass_cumulative_and_continuous():
 
 
 def test_smooth_trajectory_ema():
-    from backend.crop_utils import smooth_trajectory
+    from crop_utils import smooth_trajectory
     # If all points are static, output remains static
     raw = [(0.0, 0.5, 0.2), (0.5, 0.5, 0.2), (1.0, 0.5, 0.2)]
     smoothed = smooth_trajectory(raw, alpha=0.3)
@@ -268,7 +268,7 @@ def test_smooth_trajectory_ema():
 
 
 def test_build_dynamic_crop_filter():
-    from backend.crop_utils import build_dynamic_crop_filter
+    from crop_utils import build_dynamic_crop_filter
     trajectory = [(0.0, 0.3, 0.2), (1.0, 0.7, 0.2)]
     
     # 9:16 aspect ratio
@@ -310,7 +310,7 @@ def test_crop_to_vertical_uses_dynamic_trajectory(mock_traj, mock_popen, mock_nv
 # --- Sleep/crop stabilization additions ------------------------------------
 
 def test_apply_deadband_filter_locks_and_follows():
-    from backend.crop_utils import apply_deadband_filter
+    from crop_utils import apply_deadband_filter
     traj = [(0, 0.50, 0.2), (1, 0.52, 0.2), (2, 0.49, 0.2), (3, 0.70, 0.2), (4, 0.71, 0.2)]
     out = apply_deadband_filter(traj, default_deadband=0.08)
     xs = [round(x, 2) for _, x, _ in out]
@@ -321,12 +321,12 @@ def test_apply_deadband_filter_locks_and_follows():
 
 
 def test_apply_deadband_filter_empty_default():
-    from backend.crop_utils import apply_deadband_filter
+    from crop_utils import apply_deadband_filter
     assert apply_deadband_filter([]) == [(0.0, 0.5, 0.16)]
 
 
 def test_build_dynamic_crop_filter_static_when_under_3pct():
-    from backend.crop_utils import build_dynamic_crop_filter
+    from crop_utils import build_dynamic_crop_filter
     # Variation < 3% of frame width -> steady static crop (no lerp expression).
     traj = [(0.0, 0.50, 0.2), (0.5, 0.515, 0.2), (1.0, 0.505, 0.2)]
     f = build_dynamic_crop_filter("9:16", traj, clip_duration=1.0)

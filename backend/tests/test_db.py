@@ -1,5 +1,5 @@
 import os
-import backend.db as db
+import db as db
 
 
 

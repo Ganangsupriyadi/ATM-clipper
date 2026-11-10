@@ -1,6 +1,6 @@
 import pytest
 from backend import jobs
-from backend.main import CreateJobRequest, ManualJobRequest
+from main import CreateJobRequest, ManualJobRequest
 
 def test_job_requests_accept_subtitle_config():
     req1 = CreateJobRequest(

@@ -2,7 +2,7 @@ import json
 import os
 import tempfile
 import pytest
-from backend.crop_utils import (
+from crop_utils import (
     hex_to_ass_style_color,
     normalize_subtitle_config,
     calculate_ass_styles,

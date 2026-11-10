@@ -1,6 +1,6 @@
-from backend.metadata import parse_silence
+from metadata import parse_silence
 from fastapi.testclient import TestClient
-from backend.main import app
+from main import app
 
 client = TestClient(app)
 

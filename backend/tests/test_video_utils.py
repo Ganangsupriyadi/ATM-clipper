@@ -1,4 +1,4 @@
-from backend.video_utils import download_youtube_video
+from services.rendering.video_utils import download_youtube_video
 from unittest.mock import patch, MagicMock
 
 @patch('backend.video_utils.yt_dlp.YoutubeDL')
@@ -21,7 +21,7 @@ def test_download_youtube_video(mock_ytdl, tmp_path):
 
 
 def test_quality_to_format_caps_height():
-    from backend.video_utils import quality_to_format
+    from services.rendering.video_utils import quality_to_format
     assert "height<=2160" in quality_to_format("2160p")
     assert "height<=1440" in quality_to_format("1440p")
     assert "height<=1080" in quality_to_format("1080p")
@@ -34,7 +34,7 @@ def test_quality_to_format_caps_height():
 
 @patch('backend.video_utils.yt_dlp.YoutubeDL')
 def test_probe_formats_returns_sorted_unique_heights(mock_ytdl):
-    from backend.video_utils import probe_formats
+    from services.rendering.video_utils import probe_formats
     inst = MagicMock()
     mock_ytdl.return_value.__enter__.return_value = inst
     inst.extract_info.return_value = {

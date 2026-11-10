@@ -4,7 +4,7 @@ import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
-from backend.colab_api import (
+from colab_api import (
     DEFAULT_HOST,
     DEFAULT_PORT,
     DEFAULT_WORKSPACE,
