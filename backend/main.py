@@ -85,12 +85,14 @@ init_db()
 
 app = FastAPI(title="ATM Clipper")
 
+# Konfigurasi CORS paling longgar
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Middleware disabled for cloud mode
