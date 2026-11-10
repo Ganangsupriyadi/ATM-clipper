@@ -386,7 +386,7 @@ def test_run_resume_job_manual_provider_transitions_to_awaiting_manual(tmp_path,
         "metadata": metadata
     }
     monkeypatch.setattr("backend.db.save_history", lambda *a, **k: None)
-    monkeypatch.setattr("backend.video_utils.get_video_duration", lambda p: 10.0)
+    monkeypatch.setattr("services.rendering.video_utils.get_video_duration", lambda p: 10.0)
     monkeypatch.setattr("services.ai_utils.generate_manual_prompt", lambda t, **k: "PROMPT_TEXT")
 
     try:

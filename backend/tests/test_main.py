@@ -162,7 +162,7 @@ def test_get_job_exposes_success_and_failed_counts():
 
 
 def test_probe_endpoint_ok(monkeypatch):
-    monkeypatch.setattr("backend.video_utils.probe_formats", lambda url: [1080, 720])
+    monkeypatch.setattr("services.rendering.video_utils.probe_formats", lambda url: [1080, 720])
     r = client.get("/probe", params={"url": "https://youtube.com/watch?v=x"})
     assert r.status_code == 200
     assert r.json()["heights"] == [1080, 720]

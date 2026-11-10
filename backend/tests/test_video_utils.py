@@ -1,7 +1,7 @@
 from services.rendering.video_utils import download_youtube_video
 from unittest.mock import patch, MagicMock
 
-@patch('backend.video_utils.yt_dlp.YoutubeDL')
+@patch('services.rendering.video_utils.yt_dlp.YoutubeDL')
 def test_download_youtube_video(mock_ytdl, tmp_path):
     # Mock the YoutubeDL context manager and download method
     mock_instance = MagicMock()
@@ -32,7 +32,7 @@ def test_quality_to_format_caps_height():
     assert "height<=" not in quality_to_format("weird")
 
 
-@patch('backend.video_utils.yt_dlp.YoutubeDL')
+@patch('services.rendering.video_utils.yt_dlp.YoutubeDL')
 def test_probe_formats_returns_sorted_unique_heights(mock_ytdl):
     from services.rendering.video_utils import probe_formats
     inst = MagicMock()
