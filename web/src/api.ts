@@ -10,7 +10,7 @@ function getBaseUrl() {
     }
     if (savedUrl) return savedUrl;
   }
-  return import.meta.env.VITE_API_URL || "https://sizing-bunkhouse-random.ngrok-free.dev";
+  return import.meta.env.VITE_API_URL || "https://atm-clipper-backend.loca.lt";
 }
 
 export const API_URL = getBaseUrl();
