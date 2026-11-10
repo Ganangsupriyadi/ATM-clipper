@@ -179,7 +179,7 @@ def test_resume_job_reuses_highlights(tmp_path, monkeypatch):
     monkeypatch.setattr("backend.db.save_history", lambda *a, **k: None)
     
     # LLM function should NOT be called; if called, raise error
-    monkeypatch.setattr("backend.ai_utils.get_highlights", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("Should not call LLM")))
+    monkeypatch.setattr("services.ai_utils.get_highlights", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("Should not call LLM")))
     
     try:
         jobs._run_resume_job(job_id)
@@ -387,7 +387,7 @@ def test_run_resume_job_manual_provider_transitions_to_awaiting_manual(tmp_path,
     }
     monkeypatch.setattr("backend.db.save_history", lambda *a, **k: None)
     monkeypatch.setattr("backend.video_utils.get_video_duration", lambda p: 10.0)
-    monkeypatch.setattr("backend.ai_utils.generate_manual_prompt", lambda t, **k: "PROMPT_TEXT")
+    monkeypatch.setattr("services.ai_utils.generate_manual_prompt", lambda t, **k: "PROMPT_TEXT")
 
     try:
         jobs._run_resume_job(job_id)

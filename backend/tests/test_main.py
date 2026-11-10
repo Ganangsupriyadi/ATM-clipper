@@ -84,14 +84,14 @@ def test_create_job_rejects_invalid_url():
 def test_create_job_accepts_valid_url(monkeypatch):
     # Avoid spawning a real download/render thread.
     monkeypatch.setattr("backend.jobs.create_job", lambda *a, **k: "fake-id")
-    monkeypatch.setattr("backend.ai_utils.ping_provider", lambda *a, **k: None)
+    monkeypatch.setattr("services.ai_utils.ping_provider", lambda *a, **k: None)
     r = client.post("/jobs", json={"url": "https://youtube.com/watch?v=abc", "title": "My Test Project"})
     assert r.status_code == 200
     assert r.json()["job_id"] == "fake-id"
 
 
 def test_create_job_rejects_missing_title(monkeypatch):
-    monkeypatch.setattr("backend.ai_utils.ping_provider", lambda *a, **k: None)
+    monkeypatch.setattr("services.ai_utils.ping_provider", lambda *a, **k: None)
     r = client.post("/jobs", json={"url": "https://youtube.com/watch?v=abc", "title": ""})
     assert r.status_code == 400
     assert "Judul Proyek wajib diisi" in r.json()["message"]
@@ -190,7 +190,7 @@ def test_get_whisper_models_endpoint():
 
 
 def test_download_whisper_model_endpoint(monkeypatch):
-    monkeypatch.setattr("backend.ai_utils.download_whisper_model", lambda m: {"status": "success", "model": m, "message": "ok"})
+    monkeypatch.setattr("services.ai_utils.download_whisper_model", lambda m: {"status": "success", "model": m, "message": "ok"})
     r = client.post("/api/settings/whisper-models/download", json={"model": "medium"})
     assert r.status_code == 200
     assert r.json()["status"] == "success"
@@ -211,7 +211,7 @@ def test_get_logs_endpoint():
 
 def test_api_fetch_models_endpoint(monkeypatch):
     monkeypatch.setattr(
-        "backend.ai_utils.fetch_provider_models",
+        "services.ai_utils.fetch_provider_models",
         lambda provider, api_key: [{"id": "gemini-2.5-flash", "label": "Gemini 2.5 Flash"}]
     )
     res = client.post("/api/providers/models", json={"provider": "gemini", "api_key": "valid-key"})

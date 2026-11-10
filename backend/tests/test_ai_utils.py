@@ -1,7 +1,7 @@
-from backend.ai_utils import transcribe_audio, get_highlights
+from services.ai_utils import transcribe_audio, get_highlights
 from unittest.mock import patch, MagicMock
 
-@patch('backend.ai_utils.OpenAI')
+@patch('services.ai_utils.OpenAI')
 def test_transcribe_audio(mock_openai, tmp_path):
     mock_client = MagicMock()
     mock_openai.return_value = mock_client
@@ -15,7 +15,7 @@ def test_transcribe_audio(mock_openai, tmp_path):
     assert "WEBVTT" in res
     mock_client.audio.transcriptions.create.assert_called_once()
 
-@patch('backend.ai_utils.OpenAI')
+@patch('services.ai_utils.OpenAI')
 def test_get_highlights(mock_openai):
     mock_client = MagicMock()
     mock_openai.return_value = mock_client
@@ -31,7 +31,7 @@ def test_get_highlights(mock_openai):
     assert res[0]['description_id'] == "Pembukaan"
 
 
-@patch('backend.ai_utils.OpenAI')
+@patch('services.ai_utils.OpenAI')
 def test_get_highlights_uses_base_url_and_model(mock_openai):
     client = MagicMock()
     mock_openai.return_value = client
@@ -39,7 +39,7 @@ def test_get_highlights_uses_base_url_and_model(mock_openai):
     resp.choices[0].message.content = '{"highlights":[{"start_time":"00:00:01.000","end_time":"00:00:05.000","description_en":"x","description_id":"y"}]}'
     client.chat.completions.create.return_value = resp
 
-    from backend.ai_utils import get_highlights
+    from services.ai_utils import get_highlights
     hl = get_highlights("1\n00:00:01,000 --> 00:00:05,000\nhi\n", "key",
                         base_url="https://api.deepseek.com", model="deepseek-chat")
     assert len(hl) == 1
@@ -50,14 +50,14 @@ def test_get_highlights_uses_base_url_and_model(mock_openai):
     assert kwargs["model"] == "deepseek-chat"
 
 
-@patch('backend.ai_utils.get_highlights')
-@patch('backend.ai_utils.transcribe_with_faster_whisper')
-@patch('backend.ai_utils.extract_audio')
+@patch('services.ai_utils.get_highlights')
+@patch('services.ai_utils.transcribe_with_faster_whisper')
+@patch('services.ai_utils.extract_audio')
 def test_process_with_deepseek(mock_extract, mock_tx, mock_hl, tmp_path):
     mock_tx.return_value = "1\n00:00:01,000 --> 00:00:03,000\nhello\n"
     mock_hl.return_value = [{"start_time": "00:00:01.000", "end_time": "00:00:03.000",
                              "description_en": "a", "description_id": "b"}]
-    from backend.ai_utils import process_with_deepseek
+    from services.ai_utils import process_with_deepseek
     f = tmp_path / "v.mp4"
     f.write_bytes(b"x")
     res = process_with_deepseek(str(f), "key")
@@ -70,7 +70,7 @@ def test_process_with_deepseek(mock_extract, mock_tx, mock_hl, tmp_path):
 
 
 def test_openai_compat_registry_has_expected_providers():
-    from backend.ai_utils import OPENAI_COMPAT_PROVIDERS
+    from services.ai_utils import OPENAI_COMPAT_PROVIDERS
     for pid in ("deepseek", "groq", "openrouter", "xai", "mistral"):
         assert pid in OPENAI_COMPAT_PROVIDERS, pid
         cfg = OPENAI_COMPAT_PROVIDERS[pid]
@@ -78,11 +78,11 @@ def test_openai_compat_registry_has_expected_providers():
         assert cfg["model"]
 
 
-@patch('backend.ai_utils.get_highlights')
-@patch('backend.ai_utils.transcribe_with_faster_whisper')
-@patch('backend.ai_utils.extract_audio')
+@patch('services.ai_utils.get_highlights')
+@patch('services.ai_utils.transcribe_with_faster_whisper')
+@patch('services.ai_utils.extract_audio')
 def test_process_with_openai_compatible_routes_provider(mock_extract, mock_tx, mock_hl, tmp_path):
-    from backend.ai_utils import process_with_openai_compatible, OPENAI_COMPAT_PROVIDERS
+    from services.ai_utils import process_with_openai_compatible, OPENAI_COMPAT_PROVIDERS
     mock_tx.return_value = "1\n00:00:01,000 --> 00:00:03,000\nhi\n"
     mock_hl.return_value = [{"start_time": "00:00:01.000", "end_time": "00:00:03.000",
                              "description_en": "a", "description_id": "b"}]
@@ -96,11 +96,11 @@ def test_process_with_openai_compatible_routes_provider(mock_extract, mock_tx, m
     assert kwargs.get("model") == OPENAI_COMPAT_PROVIDERS["groq"]["model"]
 
 
-@patch('backend.ai_utils.get_highlights')
-@patch('backend.ai_utils.transcribe_with_faster_whisper')
-@patch('backend.ai_utils.extract_audio')
+@patch('services.ai_utils.get_highlights')
+@patch('services.ai_utils.transcribe_with_faster_whisper')
+@patch('services.ai_utils.extract_audio')
 def test_process_with_custom_provider_uses_custom_base_url_and_model(mock_extract, mock_tx, mock_hl, tmp_path):
-    from backend.ai_utils import process_with_openai_compatible
+    from services.ai_utils import process_with_openai_compatible
     mock_tx.return_value = "1\n00:00:01,000 --> 00:00:03,000\nhi\n"
     mock_hl.return_value = [{"start_time": "00:00:01.000", "end_time": "00:00:03.000",
                              "description_en": "a", "description_id": "b"}]
@@ -120,7 +120,7 @@ def test_process_with_custom_provider_uses_custom_base_url_and_model(mock_extrac
 
 
 def test_process_with_custom_provider_requires_base_url_and_model(tmp_path):
-    from backend.ai_utils import process_with_openai_compatible
+    from services.ai_utils import process_with_openai_compatible
     import pytest
     f = tmp_path / "v.mp4"
     f.write_bytes(b"x")
@@ -129,9 +129,9 @@ def test_process_with_custom_provider_requires_base_url_and_model(tmp_path):
                                        custom_base_url="", custom_model_name="")
 
 
-@patch('backend.ai_utils.OpenAI')
+@patch('services.ai_utils.OpenAI')
 def test_ping_custom_provider_uses_custom_endpoint(mock_openai):
-    from backend.ai_utils import ping_provider
+    from services.ai_utils import ping_provider
     client = MagicMock()
     mock_openai.return_value = client
     ping_provider("custom", "", custom_base_url="http://localhost:11434/v1", custom_model_name="llama3")
@@ -144,14 +144,14 @@ def test_ping_custom_provider_uses_custom_endpoint(mock_openai):
 
 
 def test_ping_custom_provider_requires_base_url_and_model():
-    from backend.ai_utils import ping_provider
+    from services.ai_utils import ping_provider
     import pytest
     with pytest.raises(Exception):
         ping_provider("custom", "key", custom_base_url="", custom_model_name="")
 
 
 def test_get_available_whisper_models():
-    from backend.ai_utils import get_available_whisper_models
+    from services.ai_utils import get_available_whisper_models
     models = get_available_whisper_models()
     assert len(models) >= 5
     ids = [m["id"] for m in models]
@@ -165,7 +165,7 @@ def test_get_available_whisper_models():
 
 @patch('faster_whisper.download_model')
 def test_download_whisper_model_success(mock_download_model):
-    from backend.ai_utils import download_whisper_model
+    from services.ai_utils import download_whisper_model
     mock_download_model.return_value = "C:/fake/path/medium"
     res = download_whisper_model("medium")
     assert res["status"] == "success"
@@ -175,14 +175,14 @@ def test_download_whisper_model_success(mock_download_model):
 
 
 def test_download_whisper_model_invalid():
-    from backend.ai_utils import download_whisper_model
+    from services.ai_utils import download_whisper_model
     import pytest
     with pytest.raises(ValueError):
         download_whisper_model("nonexistent-model-xyz")
 
 
 def test_fetch_provider_models_gemini():
-    from backend.ai_utils import fetch_provider_models
+    from services.ai_utils import fetch_provider_models
     from unittest.mock import MagicMock, patch
 
     mock_model_1 = MagicMock()
@@ -206,7 +206,7 @@ def test_fetch_provider_models_gemini():
 
 
 def test_fetch_provider_models_openai():
-    from backend.ai_utils import fetch_provider_models
+    from services.ai_utils import fetch_provider_models
     from unittest.mock import MagicMock, patch
 
     mock_model_1 = MagicMock()
@@ -220,14 +220,14 @@ def test_fetch_provider_models_openai():
     mock_resp.data = [mock_model_1, mock_model_2]
     mock_client.models.list.return_value = mock_resp
 
-    with patch("backend.ai_utils.OpenAI", return_value=mock_client):
+    with patch("services.ai_utils.OpenAI", return_value=mock_client):
         models = fetch_provider_models("openai", "fake-key")
         assert len(models) == 1
         assert models[0]["id"] == "gpt-4o"
 
 
 def test_transcribe_with_faster_whisper_vad_success():
-    from backend.ai_utils import transcribe_with_faster_whisper
+    from services.ai_utils import transcribe_with_faster_whisper
     from unittest.mock import MagicMock, patch
 
     mock_seg = MagicMock()
@@ -254,7 +254,7 @@ def test_transcribe_with_faster_whisper_vad_success():
 
 
 def test_transcribe_with_faster_whisper_vad_fallback_on_error():
-    from backend.ai_utils import transcribe_with_faster_whisper
+    from services.ai_utils import transcribe_with_faster_whisper
     from unittest.mock import MagicMock, patch
 
     mock_seg = MagicMock()
@@ -284,7 +284,7 @@ def test_transcribe_with_faster_whisper_vad_fallback_on_error():
 
 
 def test_transcribe_with_faster_whisper_cuda_dll_fallback_to_cpu():
-    from backend.ai_utils import transcribe_with_faster_whisper
+    from services.ai_utils import transcribe_with_faster_whisper
     from unittest.mock import MagicMock, patch
 
     mock_seg = MagicMock()

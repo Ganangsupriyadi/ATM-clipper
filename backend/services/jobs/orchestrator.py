@@ -4,7 +4,7 @@ import uuid
 import traceback
 import os
 from backend.video_utils import download_youtube_video
-from backend.ai_utils import process_with_openai, process_with_gemini, process_with_openai_compatible, OPENAI_COMPAT_PROVIDERS
+from services.ai_utils import process_with_openai, process_with_gemini, process_with_openai_compatible, OPENAI_COMPAT_PROVIDERS
 from backend.crop_utils import crop_to_vertical
 from backend.db import save_history, get_app_data_dir
 from backend.logger import log_app, log_error
@@ -417,7 +417,7 @@ def _run_job(job_id: str):
 
         try:
             if job["provider"] in ("manual_ai", "manual"):
-                from backend.ai_utils import transcribe_with_faster_whisper, extract_audio, build_srt_from_segments
+                from services.ai_utils import transcribe_with_faster_whisper, extract_audio, build_srt_from_segments
                 import json
                 
                 if os.path.exists(predicted_subtitle_path) and os.path.getsize(predicted_subtitle_path) > 0:
@@ -446,7 +446,7 @@ def _run_job(job_id: str):
                     srt_segments = [{"start": s.get("start"), "end": s.get("end"), "text": s.get("text")} for s in transcript.get("segments", [])]
                     transcript_text = build_srt_from_segments(srt_segments)
                     
-                from backend.ai_utils import generate_manual_prompt
+                from services.ai_utils import generate_manual_prompt
                 job["progress"] = "Membuat prompt manual..."
                 manual_prompt = generate_manual_prompt(transcript_text, extra_prompt=metadata.get("extra_prompt", ""), limit=limit)
                 
@@ -727,7 +727,7 @@ def _run_manual_job(job_id: str):
             except Exception as db_e:
                 log_error("jobs.manual_transcribing_save_history", db_e)
 
-            from backend.ai_utils import transcribe_with_faster_whisper
+            from services.ai_utils import transcribe_with_faster_whisper
             from backend.video_utils import extract_audio
             import json as _json
             audio_path = os.path.join(ws["source_dir"], "source_audio.mp3")
@@ -1112,7 +1112,7 @@ def _run_rerun_ai_job(job_id: str, source_video: str, old_metadata: dict):
         def is_cancelled():
             return job.get("cancelled", False)
 
-        from backend.ai_utils import process_with_gemini, process_with_openai, process_with_openai_compatible, OPENAI_COMPAT_PROVIDERS
+        from services.ai_utils import process_with_gemini, process_with_openai, process_with_openai_compatible, OPENAI_COMPAT_PROVIDERS
         if job["provider"].startswith("gemini"):
             ai_result = process_with_gemini(source_video, job["api_key"], extra_prompt=extra_prompt, model_name=job.get("model"), limit=limit, is_cancelled=is_cancelled, register_proc=lambda p: _register_proc(job, p), whisper_model=job.get("whisper_model", "small"))
         elif job["provider"] == "custom" or job["provider"] in OPENAI_COMPAT_PROVIDERS:
@@ -1537,7 +1537,7 @@ def resume_manual_job(history_id: str, json_payload: str) -> str:
         log_error("jobs.resume_manual_job_save_history", db_e)
     
     # Parse payload
-    from backend.ai_utils import _parse_highlights
+    from services.ai_utils import _parse_highlights
     parsed = _parse_highlights(json_payload)
     if not parsed:
         raise ValueError("Format JSON payload tidak valid atau kosong.")
@@ -1695,7 +1695,7 @@ def _run_resume_job(job_id: str):
             highlights = metadata["highlights"]
             log_app(f"[{job_id}] Menggunakan highlight yang tersimpan ({len(highlights)} klip), melanjutkan perenderan...")
         elif job["provider"] in ("manual_ai", "manual"):
-            from backend.ai_utils import build_srt_from_segments, generate_manual_prompt
+            from services.ai_utils import build_srt_from_segments, generate_manual_prompt
             import json
 
             # If manual prompt already exists and subtitle is present, resume directly into awaiting manual
@@ -1719,7 +1719,7 @@ def _run_resume_job(job_id: str):
                     with open(subtitle_path, "r", encoding="utf-8") as f:
                         transcript_text = f.read()
             else:
-                from backend.ai_utils import transcribe_with_faster_whisper, extract_audio
+                from services.ai_utils import transcribe_with_faster_whisper, extract_audio
                 audio_path = os.path.join(ws["source_dir"], "source_audio.mp3")
                 job["status"] = "TRANSCRIBING"
                 job["progress"] = "Mengekstrak audio..."
@@ -1752,11 +1752,11 @@ def _run_resume_job(job_id: str):
             with open(subtitle_path, "r", encoding="utf-8") as f:
                 transcript_text = f.read()
 
-            from backend.ai_utils import get_highlights, OPENAI_COMPAT_PROVIDERS
+            from services.ai_utils import get_highlights, OPENAI_COMPAT_PROVIDERS
             if job["provider"].startswith("gemini"):
                 from google import genai
                 from google.genai import types
-                from backend.ai_utils import _with_retry, HIGHLIGHT_GUIDANCE, SOCIAL_PROMPT_TEMPLATE, _get_user_datetime_context, _parse_highlights
+                from services.ai_utils import _with_retry, HIGHLIGHT_GUIDANCE, SOCIAL_PROMPT_TEMPLATE, _get_user_datetime_context, _parse_highlights
                 client = genai.Client(api_key=job["api_key"])
                 model_name = job.get("model")
                 
@@ -1797,7 +1797,7 @@ def _run_resume_job(job_id: str):
             job["progress"] = f"Mengekstrak dan menganalisis dengan {job['provider']} (Resume)..."
             
             is_karaoke = (job.get("caption_style") == "karaoke")
-            from backend.ai_utils import process_with_gemini, process_with_openai_compatible, process_with_openai, OPENAI_COMPAT_PROVIDERS
+            from services.ai_utils import process_with_gemini, process_with_openai_compatible, process_with_openai, OPENAI_COMPAT_PROVIDERS
 
             base, _ = os.path.splitext(source_video)
             predicted_subtitle_path = base + (".words.json" if is_karaoke else ".srt")

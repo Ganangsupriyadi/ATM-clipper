@@ -255,7 +255,7 @@ class GenerateSocialKitRequest(BaseModel):
 @app.post("/api/settings/test-ai")
 def api_test_ai(req: TestAiRequest):
     try:
-        from backend.ai_utils import ping_provider
+        from services.ai_utils import ping_provider
         ping_provider(req.provider, req.api_key.strip(), req.custom_base_url.strip(), req.custom_model_name.strip(), model=req.model.strip() if req.model else None)
         return {"status": "success", "message": "API Key is valid!"}
     except Exception as e:
@@ -265,7 +265,7 @@ def api_test_ai(req: TestAiRequest):
 def api_fetch_models(req: FetchModelsRequest):
     """Fetch available models from a provider's API."""
     try:
-        from backend.ai_utils import fetch_provider_models
+        from services.ai_utils import fetch_provider_models
         models = fetch_provider_models(req.provider, req.api_key.strip())
         return {"status": "success", "models": models}
     except Exception as e:
@@ -288,7 +288,7 @@ def api_test_pexels(req: TestPexelsRequest):
 @app.get("/api/settings/whisper-models")
 def api_get_whisper_models():
     try:
-        from backend.ai_utils import get_available_whisper_models
+        from services.ai_utils import get_available_whisper_models
         return {"status": "success", "models": get_available_whisper_models()}
     except Exception as e:
         log_error("api_get_whisper_models", e)
@@ -302,7 +302,7 @@ class DownloadWhisperModelRequest(BaseModel):
 @app.post("/api/settings/whisper-models/download")
 def api_download_whisper_model(req: DownloadWhisperModelRequest):
     try:
-        from backend.ai_utils import download_whisper_model
+        from services.ai_utils import download_whisper_model
         res = download_whisper_model(req.model.strip())
         return res
     except Exception as e:
@@ -401,7 +401,7 @@ def api_rerender_job(job_id: str, req: CreateJobRequest):
 @app.post("/jobs/{job_id}/rerun_ai")
 def api_rerun_ai_job(job_id: str, req: CreateJobRequest):
     try:
-        from backend.ai_utils import ping_provider
+        from services.ai_utils import ping_provider
         ping_provider(req.provider, req.api_key.strip(), req.custom_base_url.strip(), req.custom_model_name.strip(), model=req.model.strip() if req.model else None)
         from backend.jobs import create_rerun_ai_job
         canvas_cfg = req.canvas_config.model_dump() if req.canvas_config else None
@@ -474,7 +474,7 @@ class AICorrectSubtitleRequest(BaseModel):
 @app.post("/api/ai/correct-subtitle")
 async def api_ai_correct_subtitle(req: AICorrectSubtitleRequest):
     try:
-        from backend.ai_utils import correct_subtitle_words_with_ai
+        from services.ai_utils import correct_subtitle_words_with_ai
         if not req.api_key and req.provider != "custom":
             raise ValueError("API Key is required for Auto mode.")
             
@@ -667,7 +667,7 @@ def api_create_job(req: CreateJobRequest):
         return JSONResponse(status_code=400, content={"status": "error", "message": "URL tidak valid. Didukung: YouTube, TikTok, Instagram, X/Twitter, atau upload file lokal."})
 
     try:
-        from backend.ai_utils import ping_provider
+        from services.ai_utils import ping_provider
         ping_provider(req.provider, req.api_key.strip(), req.custom_base_url.strip(), req.custom_model_name.strip(), model=req.model.strip() if req.model else None)
     except Exception as e:
         return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
@@ -705,7 +705,7 @@ def api_get_job(job_id: str):
 def api_generate_social_kit(job_id: str, clip_index: int, req: GenerateSocialKitRequest):
     from backend.jobs import get_job
     from backend.db import get_history, save_history
-    from backend.ai_utils import generate_social_kit_only
+    from services.ai_utils import generate_social_kit_only
     
     job = get_job(job_id)
     is_active = True
