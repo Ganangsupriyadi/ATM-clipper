@@ -31,9 +31,9 @@ export const OUTPUT_STYLE_OPTIONS: OutputStyleOption[] = [
     badge: "AI Powered",
     icon: ScanFace,
     renderPreview: () => (
-      <div className="w-7 h-11 rounded border border-slate-300 bg-slate-100 flex flex-col items-center justify-center relative overflow-hidden group-hover:border-purple-400 transition-colors">
-        <div className="w-3.5 h-3.5 rounded-full bg-purple-100 border border-purple-500 flex items-center justify-center animate-pulse">
-          <div className="w-1.5 h-1.5 rounded-full bg-purple-600" />
+      <div className="w-7 h-11 rounded border border-slate-300 bg-slate-100 flex flex-col items-center justify-center relative overflow-hidden group-hover:border-emerald-400 transition-colors">
+        <div className="w-3.5 h-3.5 rounded-full bg-emerald-100 border border-emerald-500 flex items-center justify-center animate-pulse">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
         </div>
         <div className="w-4 h-1.5 bg-slate-300 rounded-sm mt-1" />
       </div>
@@ -48,10 +48,10 @@ export const OUTPUT_STYLE_OPTIONS: OutputStyleOption[] = [
     badge: "Full View",
     icon: Layers,
     renderPreview: () => (
-      <div className="w-7 h-11 rounded border border-slate-300 bg-slate-200 flex flex-col items-center justify-center relative overflow-hidden group-hover:border-purple-400 transition-colors">
+      <div className="w-7 h-11 rounded border border-slate-300 bg-slate-200 flex flex-col items-center justify-center relative overflow-hidden group-hover:border-emerald-400 transition-colors">
         <div className="absolute inset-0 bg-slate-300/60 backdrop-blur-[1px]" />
-        <div className="w-6 h-3.5 bg-white border border-purple-400 rounded-sm z-10 shadow-sm flex items-center justify-center">
-          <div className="w-3 h-1 bg-purple-200 rounded-sm" />
+        <div className="w-6 h-3.5 bg-white border border-emerald-400 rounded-sm z-10 shadow-sm flex items-center justify-center">
+          <div className="w-3 h-1 bg-emerald-200 rounded-sm" />
         </div>
       </div>
     ),
@@ -64,7 +64,7 @@ export const OUTPUT_STYLE_OPTIONS: OutputStyleOption[] = [
     platforms: "YouTube, Web, Desktop",
     icon: Monitor,
     renderPreview: () => (
-      <div className="w-11 h-7 rounded border border-slate-300 bg-slate-100 flex items-center justify-center relative overflow-hidden group-hover:border-purple-400 transition-colors">
+      <div className="w-11 h-7 rounded border border-slate-300 bg-slate-100 flex items-center justify-center relative overflow-hidden group-hover:border-emerald-400 transition-colors">
         <div className="w-7 h-4 bg-white border border-slate-300 rounded-sm flex items-center justify-center">
           <div className="w-4 h-1.5 bg-slate-200 rounded-sm" />
         </div>
@@ -79,7 +79,7 @@ export const OUTPUT_STYLE_OPTIONS: OutputStyleOption[] = [
     platforms: "Instagram, LinkedIn, X",
     icon: Square,
     renderPreview: () => (
-      <div className="w-8 h-8 rounded border border-slate-300 bg-slate-100 flex items-center justify-center relative overflow-hidden group-hover:border-purple-400 transition-colors">
+      <div className="w-8 h-8 rounded border border-slate-300 bg-slate-100 flex items-center justify-center relative overflow-hidden group-hover:border-emerald-400 transition-colors">
         <div className="w-5 h-5 bg-white border border-slate-300 rounded-sm flex items-center justify-center">
           <div className="w-2.5 h-2.5 bg-slate-200 rounded-sm" />
         </div>
@@ -125,11 +125,11 @@ export const OutputStyleSelector: React.FC<OutputStyleSelectorProps> = ({
               aria-checked={isSelected}
               disabled={disabled}
               onClick={() => onChange(option.id)}
-              className={`group relative flex flex-col text-left p-3.5 rounded-2xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 ${
+              className={`group relative flex flex-col text-left p-3.5 rounded-2xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 ${
                 disabled
                   ? "opacity-50 cursor-not-allowed bg-slate-50 border-slate-200"
                   : isSelected
-                  ? "bg-purple-50/70 border-purple-500 shadow-md ring-1 ring-purple-500/30"
+                  ? "bg-emerald-50/70 border-emerald-500 shadow-md ring-1 ring-emerald-500/30"
                   : "bg-white border-border hover:border-slate-300 hover:bg-slate-50/80 shadow-sm"
               }`}
             >
@@ -139,7 +139,7 @@ export const OutputStyleSelector: React.FC<OutputStyleSelectorProps> = ({
                   <div
                     className={`p-1.5 rounded-xl border transition-colors ${
                       isSelected
-                        ? "bg-purple-100 border-purple-200 text-purple-600"
+                        ? "bg-emerald-100 border-emerald-200 text-emerald-600"
                         : "bg-slate-100 border-slate-200 text-slate-500 group-hover:text-slate-700"
                     }`}
                   >
@@ -161,14 +161,14 @@ export const OutputStyleSelector: React.FC<OutputStyleSelectorProps> = ({
                 <div className="flex items-center gap-1.5">
                   {option.badge && !isSelected && (
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                      {option.id === "face_crop" && <Sparkles className="w-2.5 h-2.5 text-purple-600" />}
+                      {option.id === "face_crop" && <Sparkles className="w-2.5 h-2.5 text-emerald-600" />}
                       {option.badge}
                     </span>
                   )}
                   <div
                     className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
                       isSelected
-                        ? "bg-purple-600 border-purple-600 text-white"
+                        ? "bg-emerald-600 border-emerald-600 text-white"
                         : "border-slate-300 bg-slate-50 group-hover:border-slate-400"
                     }`}
                   >

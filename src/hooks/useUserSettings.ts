@@ -35,10 +35,20 @@ function wireAuthOnce() {
   if (authWired) return;
   authWired = true;
 
+  const publicUrl = import.meta.env.VITE_PUBLIC_BACKEND_URL;
+
   axios.interceptors.request.use((config) => {
-    if (currentToken && config.url && (config.url.includes('127.0.0.1') || config.url.includes('localhost'))) {
+    const isLocal = config.url && (config.url.includes('127.0.0.1') || config.url.includes('localhost'));
+    const isRemote = publicUrl && config.url && config.url.includes(publicUrl);
+    
+    if (currentToken && (isLocal || isRemote)) {
       config.headers = config.headers || {};
       (config.headers as any)['Authorization'] = `Bearer ${currentToken}`;
+      
+      // Tambahkan ini untuk bypass Ngrok warning page
+      if (isRemote) {
+        (config.headers as any)['ngrok-skip-browser-warning'] = '69420';
+      }
     }
     return config;
   });
@@ -47,13 +57,19 @@ function wireAuthOnce() {
   window.fetch = async (...args) => {
     let [resource, config] = args as [any, any];
     const urlStr = typeof resource === 'string' ? resource : (resource as Request).url;
-    if (currentToken && (urlStr.includes('127.0.0.1') || urlStr.includes('localhost'))) {
+    const isLocal = urlStr.includes('127.0.0.1') || urlStr.includes('localhost');
+    const isRemote = publicUrl && urlStr.includes(publicUrl);
+
+    if (currentToken && (isLocal || isRemote)) {
       config = config || {};
-      if (config.headers instanceof Headers) {
-        config.headers.set('Authorization', `Bearer ${currentToken}`);
-      } else {
-        config.headers = { ...config.headers, 'Authorization': `Bearer ${currentToken}` };
+      const headers = config.headers instanceof Headers ? config.headers : new Headers(config.headers || {});
+      
+      headers.set('Authorization', `Bearer ${currentToken}`);
+      if (isRemote) {
+        headers.set('ngrok-skip-browser-warning', '69420');
       }
+      
+      config.headers = headers;
     }
     return originalFetch(resource, config);
   };
@@ -242,6 +258,20 @@ export function useUserSettings() {
 
   useEffect(() => {
     async function init() {
+      // 1. Prioritaskan URL Remote dari Environment Variable
+      const remoteUrl = import.meta.env.VITE_PUBLIC_BACKEND_URL;
+      const remoteToken = import.meta.env.VITE_PUBLIC_BACKEND_TOKEN;
+
+      if (remoteUrl && remoteUrl.trim() !== "") {
+        console.log("🚀 MENGGUNAKAN BACKEND REMOTE:", remoteUrl);
+        setApiUrl(remoteUrl);
+        currentToken = remoteToken || "dev-token";
+        (window as any).apiToken = currentToken;
+        wireAuthOnce();
+        setIsInitializing(false);
+        return; // BERHENTI DI SINI, JANGAN JALANKAN LOGIKA TAURI
+      }
+
       if (IS_TAURI) {
         window.addEventListener("backend-port-found", ((e: CustomEvent) => {
             console.log("Late backend connection established!");

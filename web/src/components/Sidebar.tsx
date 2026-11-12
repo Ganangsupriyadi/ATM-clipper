@@ -51,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
       <div className="p-5 sm:p-6 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-text-primary">
-            Auto Clipper
+            ATM Clipper
           </h1>
           <div className="mt-1 flex items-center">
             <span className="text-caption text-text-tertiary bg-bg-surface px-1.5 py-0.5 rounded border border-border">
@@ -83,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2.5 rounded-xl text-body font-medium transition-colors ${
               isActive
-                ? "bg-purple-50 text-purple-700 font-semibold border-l-4 border-purple-600 shadow-sm"
+                ? "bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600 shadow-sm"
                 : "text-text-secondary hover:text-text-primary hover:bg-bg-surface border-l-4 border-transparent"
             }`
           }
@@ -100,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2.5 rounded-xl text-body font-medium transition-colors ${
               isActive
-                ? "bg-purple-50 text-purple-700 font-semibold border-l-4 border-purple-600 shadow-sm"
+                ? "bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600 shadow-sm"
                 : "text-text-secondary hover:text-text-primary hover:bg-bg-surface border-l-4 border-transparent"
             }`
           }
@@ -117,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
               isConnected
                 ? "bg-success"
                 : isReconnecting
-                  ? "bg-purple-500"
+                  ? "bg-emerald-500"
                   : "bg-error"
             }`} />
             <span className="text-caption text-text-secondary font-medium">
@@ -130,7 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
               type="button"
               onClick={reconnect}
               disabled={isReconnecting}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-caption font-semibold bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-caption font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${isReconnecting ? "animate-spin" : ""}`}
@@ -141,12 +141,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
         </div>
 
         <div className="mt-3 pt-3 border-t border-border/60 flex flex-col items-center gap-1 text-caption text-text-tertiary">
-          <span>&copy; {currentYear} Auto Clipper</span>
+          <span>&copy; {currentYear} ATM Clipper</span>
           <a
             href="https://auto-clipper.dhims.web.id"
             target="_blank"
             rel="noreferrer"
-            className="hover:text-purple-600 transition-colors cursor-pointer"
+            className="hover:text-emerald-600 transition-colors cursor-pointer"
           >
             Official Website
           </a>

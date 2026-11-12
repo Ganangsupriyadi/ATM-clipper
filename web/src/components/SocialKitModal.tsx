@@ -40,7 +40,7 @@ const CopyItem: React.FC<{ text: string; label?: string }> = ({ text, label }) =
   return (
     <button
       onClick={handleCopy}
-      className="px-2.5 py-1 text-xs font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors flex items-center gap-1 shrink-0"
+      className="px-2.5 py-1 text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors flex items-center gap-1 shrink-0"
       title="Copy to clipboard"
     >
       {copied ? (
@@ -89,7 +89,7 @@ export const SocialKitModal: React.FC<SocialKitModalProps> = ({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-white shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-purple-50 text-purple-600 rounded-xl border border-purple-100">
+            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -112,7 +112,7 @@ export const SocialKitModal: React.FC<SocialKitModalProps> = ({
               onClick={() => setActiveTab("ID")}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                 activeTab === "ID"
-                  ? "bg-white text-purple-700 shadow-sm"
+                  ? "bg-white text-emerald-700 shadow-sm"
                   : "text-text-secondary hover:text-text-primary"
               }`}
             >
@@ -122,7 +122,7 @@ export const SocialKitModal: React.FC<SocialKitModalProps> = ({
               onClick={() => setActiveTab("EN")}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                 activeTab === "EN"
-                  ? "bg-white text-purple-700 shadow-sm"
+                  ? "bg-white text-emerald-700 shadow-sm"
                   : "text-text-secondary hover:text-text-primary"
               }`}
             >
@@ -176,7 +176,7 @@ export const SocialKitModal: React.FC<SocialKitModalProps> = ({
                 <span className="font-semibold text-text-primary">Hashtags:</span>
                 <CopyItem text={joinedHashtags} />
               </div>
-              <p className="p-2.5 bg-white rounded-lg border border-border text-purple-700 font-medium leading-relaxed font-mono">
+              <p className="p-2.5 bg-white rounded-lg border border-border text-emerald-700 font-medium leading-relaxed font-mono">
                 {joinedHashtags}
               </p>
             </div>
@@ -188,7 +188,7 @@ export const SocialKitModal: React.FC<SocialKitModalProps> = ({
               <div className="p-3 bg-bg-surface/50 border border-border rounded-xl space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-text-primary flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-purple-600" /> Best Time:
+                    <Clock className="w-3.5 h-3.5 text-emerald-600" /> Best Time:
                   </span>
                   <CopyItem text={bestTime} />
                 </div>
@@ -200,7 +200,7 @@ export const SocialKitModal: React.FC<SocialKitModalProps> = ({
               <div className="p-3 bg-bg-surface/50 border border-border rounded-xl space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-text-primary flex items-center gap-1.5">
-                    <Music className="w-3.5 h-3.5 text-purple-600" /> Audio:
+                    <Music className="w-3.5 h-3.5 text-emerald-600" /> Audio:
                   </span>
                   <CopyItem text={backsound} />
                 </div>
@@ -214,7 +214,7 @@ export const SocialKitModal: React.FC<SocialKitModalProps> = ({
             <div className="p-3.5 bg-bg-surface/50 border border-border rounded-xl space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-text-primary flex items-center gap-1.5">
-                  <ImageIcon className="w-3.5 h-3.5 text-purple-600" /> Thumbnail Idea:
+                  <ImageIcon className="w-3.5 h-3.5 text-emerald-600" /> Thumbnail Idea:
                 </span>
                 <CopyItem text={thumbnail} />
               </div>

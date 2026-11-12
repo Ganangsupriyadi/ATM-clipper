@@ -128,7 +128,7 @@ function MainApp() {
         </Routes>
       </HashRouter>
 
-      {/* Busy Overlay Modal (Persistent Modal like Desktop Auto Clipper) */}
+      {/* Busy Overlay Modal (Persistent Modal like Desktop ATM Clipper) */}
       <BusyOverlay />
 
       {/* Global Modals for Job Flow */}

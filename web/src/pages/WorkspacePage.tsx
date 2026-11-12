@@ -39,7 +39,7 @@ export const WorkspacePage: React.FC = () => {
                     console.error("Resume failed:", err);
                   }
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Lanjutkan (Resume)
@@ -66,7 +66,7 @@ export const WorkspacePage: React.FC = () => {
             {(ctx.status === "AWAITING_MANUAL" || ctx.status === "DONE") && (
               <button
                 onClick={() => ctx.status === "DONE" ? ctx.setIsResultsModalOpen(true) : ctx.setIsPromptModalOpen(true)}
-                className="text-xs font-semibold text-purple-600 hover:text-purple-700 underline underline-offset-2"
+                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 underline underline-offset-2"
               >
                 {ctx.status === "DONE" ? "Lihat Hasil Klip" : "Buka Prompt AI"}
               </button>

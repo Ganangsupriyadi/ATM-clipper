@@ -20,9 +20,9 @@ export const AppLayout: React.FC = () => {
           </button>
           <div className="flex items-center gap-2">
             <span className="font-extrabold text-base text-text-primary">
-              Auto Clipper
+              ATM Clipper
             </span>
-            <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">
+            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
               Cloud
             </span>
           </div>

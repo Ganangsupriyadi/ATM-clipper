@@ -1,0 +1,27 @@
+{
+  "project": "ATM-clipper",
+  "date": "2026-11-11",
+  "summary": "Audit dan solusi konektivitas frontend lokal ke backend Google Colab via Ngrok, optimasi disk lokal SSD Colab, dan migrasi branch feature/redesign.",
+  "steps": [
+    {
+      "step": 1,
+      "topic": "Analisis Masalah Koneksi Vercel/Colab & Lokal/Colab",
+      "details": "Vercel tidak cocok untuk backend Colab yang URL Ngrok-nya dinamis. Solusi terbaik adalah Frontend di Lokal dan Backend di Google Colab T4."
+    },
+    {
+      "step": 2,
+      "topic": "Perbaikan Axios & Fetch Interceptor",
+      "details": "Menambahkan dukungan URL remote dan header `ngrok-skip-browser-warning` untuk menghindari blokir CORS dari Ngrok."
+    },
+    {
+      "step": 3,
+      "topic": "Optimasi Performa Colab",
+      "details": "Memindahkan workspace backend dari Google Drive ke SSD lokal Colab (`/content/workspace`) untuk menghilangkan latency I/O, serta menggunakan model Whisper 'small'."
+    },
+    {
+      "step": 4,
+      "topic": "Fix File .env.local Encoding",
+      "details": "Memperbaiki format encoding file `.env.local` dari UTF-16 ke UTF-8 murni agar Vite dapat membaca variabel environment dengan benar."
+    }
+  ]
+}
