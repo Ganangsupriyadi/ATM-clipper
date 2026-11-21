@@ -1,12 +1,7 @@
 import React from "react";
-import {
-  Scissors,
-  Clock,
-  RefreshCw,
-  X,
-} from "lucide-react";
+import { Scissors, Clock, RefreshCw, X, LogOut } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { apiCheckHealth } from "../api";
+import { apiCheckHealth, clearAuthToken } from "../api";
 
 export interface SidebarProps {
   isOpen?: boolean;
@@ -32,9 +27,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
     return () => clearInterval(interval);
   }, [checkHealth]);
 
+  // Drawer must never stay open by accident: close on Escape and as soon as the
+  // window becomes wide enough to show the permanent sidebar.
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && onClose) onClose();
+    };
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onWide = () => {
+      if (mq.matches && onClose) onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    mq.addEventListener("change", onWide);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      mq.removeEventListener("change", onWide);
+    };
+  }, [isOpen, onClose]);
+
   const reconnect = async () => {
     setStatus("reconnecting");
     await checkHealth();
+  };
+
+  const handleLogout = () => {
+    clearAuthToken();
+    window.location.reload();
   };
 
   const isConnected = status === "connected";
@@ -48,106 +67,75 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
 
   const renderNavContent = (isMobile: boolean) => (
     <>
-      <div className="p-5 sm:p-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-text-primary">
-            ATM Clipper
-          </h1>
-          <div className="mt-1 flex items-center">
-            <span className="text-caption text-text-tertiary bg-bg-surface px-1.5 py-0.5 rounded border border-border">
-              Cloud
-            </span>
-          </div>
+      <div className="ac-sidebar-head">
+        <div style={{ minWidth: 0 }}>
+          <h1 className="ac-brand">ATM_Clipper</h1>
+          <span className="ac-brand-badge">Cloud</span>
         </div>
         {isMobile && onClose && (
-          <button
-            onClick={onClose}
-            className="p-2 text-text-tertiary hover:text-text-primary rounded-xl hover:bg-bg-surface transition-colors"
-            aria-label="Close menu"
-          >
-            <X className="w-5 h-5" />
+          <button className="ac-foot-btn" style={{ width: "auto", marginTop: 0 }} onClick={onClose} aria-label="Close menu">
+            <X />
           </button>
         )}
       </div>
 
-      <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
-        <div className="text-overline text-text-tertiary px-3 mb-2 mt-2">
-          Menu
-        </div>
+      <nav className="ac-nav">
+        <div className="ac-nav-label">Menu</div>
 
         <NavLink
           to="/"
-          onClick={() => {
-            if (isMobile && onClose) onClose();
-          }}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2.5 rounded-xl text-body font-medium transition-colors ${
-              isActive
-                ? "bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600 shadow-sm"
-                : "text-text-secondary hover:text-text-primary hover:bg-bg-surface border-l-4 border-transparent"
-            }`
-          }
+          onClick={() => onClose && onClose()}
+          className={({ isActive }) => `ac-nav-item${isActive ? " is-active" : ""}`}
         >
-          <Scissors className="w-5 h-5" />
-          Workspace
+          {({ isActive }) => (
+            <>
+              <Scissors />
+              <span>Workspace</span>
+              {isActive && <span className="ac-nav-dot" />}
+            </>
+          )}
         </NavLink>
 
         <NavLink
           to="/history"
-          onClick={() => {
-            if (isMobile && onClose) onClose();
-          }}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2.5 rounded-xl text-body font-medium transition-colors ${
-              isActive
-                ? "bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600 shadow-sm"
-                : "text-text-secondary hover:text-text-primary hover:bg-bg-surface border-l-4 border-transparent"
-            }`
-          }
+          onClick={() => onClose && onClose()}
+          className={({ isActive }) => `ac-nav-item${isActive ? " is-active" : ""}`}
         >
-          <Clock className="w-5 h-5" />
-          History
+          {({ isActive }) => (
+            <>
+              <Clock />
+              <span>History</span>
+              {isActive && <span className="ac-nav-dot" />}
+            </>
+          )}
         </NavLink>
       </nav>
 
-      <div className="p-4 mt-auto border-t border-border space-y-2 bg-slate-50/50">
-        <div className="px-2 py-1 space-y-2">
-          <div className="flex items-center gap-2">
-            <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${
-              isConnected
-                ? "bg-success"
-                : isReconnecting
-                  ? "bg-emerald-500"
-                  : "bg-error"
-            }`} />
-            <span className="text-caption text-text-secondary font-medium">
-              {statusLabel}
-            </span>
-          </div>
-
-          {(status === "disconnected" || isReconnecting) && (
-            <button
-              type="button"
-              onClick={reconnect}
-              disabled={isReconnecting}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-caption font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
-            >
-              <RefreshCw
-                className={`w-3.5 h-3.5 ${isReconnecting ? "animate-spin" : ""}`}
-              />
-              {isReconnecting ? "Reconnecting..." : "Reconnect"}
-            </button>
-          )}
+      <div className="ac-sidebar-foot">
+        <div className="ac-status">
+          <span
+            className={`ac-status-dot ${
+              isConnected ? "on" : isReconnecting ? "warn" : "off"
+            }`}
+          />
+          <span>{statusLabel}</span>
         </div>
 
-        <div className="mt-3 pt-3 border-t border-border/60 flex flex-col items-center gap-1 text-caption text-text-tertiary">
-          <span>&copy; {currentYear} ATM Clipper</span>
-          <a
-            href="https://auto-clipper.dhims.web.id"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-emerald-600 transition-colors cursor-pointer"
-          >
+        {(status === "disconnected" || isReconnecting) && (
+          <button type="button" className="ac-foot-btn primary" onClick={reconnect} disabled={isReconnecting}>
+            <RefreshCw className={isReconnecting ? "animate-spin" : ""} />
+            {isReconnecting ? "Reconnecting..." : "Reconnect"}
+          </button>
+        )}
+
+        <button type="button" className="ac-foot-btn danger" onClick={handleLogout}>
+          <LogOut />
+          Logout
+        </button>
+
+        <div className="ac-foot-meta">
+          <div>&copy; {currentYear} ATM_Clipper</div>
+          <a href="https://auto-clipper.dhims.web.id" target="_blank" rel="noreferrer">
             Official Website
           </a>
         </div>
@@ -157,28 +145,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
 
   return (
     <>
-      {/* Desktop Sticky Sidebar */}
-      <aside className="hidden md:flex w-60 h-screen bg-bg-secondary border-r border-border flex-col transition-all duration-200 shrink-0">
-        {renderNavContent(false)}
-      </aside>
+      {/* Permanent sidebar (≥768px), plain CSS so the classes can't be purged */}
+      <aside className="ac-sidebar">{renderNavContent(false)}</aside>
 
-      {/* Mobile Drawer Overlay */}
+      {/* Mobile drawer */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden animate-fadeIn"
-          onClick={onClose}
-          aria-hidden="true"
-        />
+        <>
+          <div className="ac-drawer-backdrop" onClick={onClose} aria-hidden="true" />
+          <aside className="ac-drawer">{renderNavContent(true)}</aside>
+        </>
       )}
-
-      {/* Mobile Drawer Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-white border-r border-border z-50 flex flex-col transition-transform duration-300 shadow-2xl md:hidden ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {renderNavContent(true)}
-      </aside>
     </>
   );
 };
+
+export default Sidebar;
+

@@ -47,7 +47,9 @@ function MainApp() {
   // Automatic modal synchronization based on background job status
   useEffect(() => {
     if (jobId) {
-      if (status === "AWAITING_MANUAL" && prompt) {
+      if (status === "AWAITING_MANUAL") {
+        // Open even when the prompt text hasn't arrived yet; the user still needs
+        // to see that the job is waiting on them.
         setIsPromptModalOpen(true);
       } else if (
         status === "DONE" && clips && clips.length > 0 && shownResultsForJobId !== jobId
@@ -153,7 +155,8 @@ function MainApp() {
           id: `clip-${i}`,
           path: c.path,
           title: c.social?.title || c.description,
-          social: c.social
+          social: c.social,
+          score: c.score
         }))}
         onEditSubtitle={(clipIdx) => {
           const targetJobId = activeHistoryJob?.id || jobId;
@@ -185,6 +188,11 @@ function MainApp() {
           }
           initialCanvasConfig={activeEditModalClip.jobMeta?.canvas_config || DEFAULT_CANVAS_CONFIG}
           initialSubtitleConfig={activeEditModalClip.jobMeta?.subtitle_config || DEFAULT_SUBTITLE_CONFIG}
+          initialBurnSubs={
+            (activeHistoryJob?.clips || (activeHistoryJob as any)?.result_clips || [])[
+              activeEditModalClip.index
+            ]?.subs ?? activeEditModalClip.jobMeta?.burn_subs ?? true
+          }
           onClose={() => setActiveEditModalClip(null)}
           onRerenderStart={(newJobId) => {
             setActiveEditModalClip(null);

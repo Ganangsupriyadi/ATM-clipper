@@ -7,33 +7,24 @@ export const AppLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full bg-bg-primary overflow-hidden">
-      {/* Mobile Top Navigation Header */}
-      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-white/95 backdrop-blur-md border-b border-border sticky top-0 z-30 shrink-0 shadow-sm">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="p-2 -ml-1 text-text-secondary hover:text-text-primary hover:bg-bg-surface rounded-xl transition-colors"
-            aria-label="Open navigation menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-base text-text-primary">
-              ATM Clipper
-            </span>
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-              Cloud
-            </span>
-          </div>
-        </div>
+    // Plain CSS shell (ac-*): the Tailwind md:* variants kept getting dropped,
+    // which stacked the mobile header on top of the sidebar.
+    <div className="ac-shell">
+      <header className="ac-topbar">
+        <button
+          className="ac-topbar-btn"
+          onClick={() => setIsMobileMenuOpen(true)}
+          aria-label="Open navigation menu"
+        >
+          <Menu />
+        </button>
+        <span className="ac-topbar-brand">ATM Clipper</span>
+        <span className="ac-topbar-badge">Cloud</span>
       </header>
 
-      {/* Sidebar (Desktop and Mobile Drawer) */}
       <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
-      {/* Main Page Area */}
-      <main className="flex-1 h-full overflow-y-auto relative w-full">
+      <main className="ac-main">
         <Outlet />
       </main>
     </div>

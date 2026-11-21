@@ -186,10 +186,10 @@ export const SubtitleConfigControls: React.FC<SubtitleConfigControlsProps> = ({
 
       {/* Typography & Appearance Config Card */}
       <div className="p-4 bg-bg-secondary/70 rounded-xl border border-accent/20 animate-slide-up">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           {/* Left Column: Live Preview */}
-          <div className="lg:col-span-5">
-            <div className="sticky top-4 space-y-2">
+          <div className="xl:col-span-5 min-w-0">
+            <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-text-secondary uppercase tracking-wider">
                 <Eye className="w-3.5 h-3.5 text-accent" />
                 <span>Pratinjau Langsung Subtitle (Live Preview)</span>
@@ -273,7 +273,7 @@ export const SubtitleConfigControls: React.FC<SubtitleConfigControlsProps> = ({
           </div>
 
           {/* Right Column: Advanced Configuration */}
-          <div className="lg:col-span-7 space-y-4">
+          <div className="xl:col-span-7 space-y-4 min-w-0">
             {/* Accordion Toggle */}
             <button
               type="button"

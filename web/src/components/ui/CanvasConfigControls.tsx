@@ -1,6 +1,7 @@
-import React, { useRef } from "react";
-import { Sparkles, Palette, Image as ImageIcon, Check, Upload, Trash2, Info, Monitor, Smartphone } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { Sparkles, Palette, Image as ImageIcon, Check, Upload, Trash2, Info, Monitor, Smartphone, Loader2, AlertCircle } from "lucide-react";
 import type { CanvasConfig } from "../../types/canvas";
+import { apiUploadImage } from "../../api";
 
 interface CanvasConfigControlsProps {
   config: CanvasConfig;
@@ -22,27 +23,45 @@ export const CanvasConfigControls: React.FC<CanvasConfigControlsProps> = ({
   showModeSwitch = true,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  // Local preview only; the config itself carries the *server-side* path, which
+  // is what ffmpeg can actually open.
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const isEnabled = config.enabled;
   const bgType = config.background_type || "blur";
   const blurLevel = config.blur_level || "medium";
   const bgColor = config.background_color || "#000000";
   const bgImage = config.background_image_path || "";
+  const bgImageName = bgImage ? bgImage.split(/[\\/]/).pop() || bgImage : "";
   const enlargeScale = config.enlarge_scale || 1.0;
 
   const handleSelectImage = () => {
     fileInputRef.current?.click();
   };
 
-  const handleWebFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWebFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const fakePath = URL.createObjectURL(file);
+    // Reset so picking the same file twice still fires onChange.
+    e.target.value = "";
+    if (!file) return;
+
+    setImageError(null);
+    setUploadingImage(true);
+    try {
+      // Must go to the backend: a blob: URL is unreadable by the renderer.
+      const serverPath = await apiUploadImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
       onChange({
         ...config,
         background_type: "image",
-        background_image_path: fakePath,
+        background_image_path: serverPath,
       });
+    } catch (err: any) {
+      setImageError(err?.message || "Gagal mengunggah gambar.");
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -263,18 +282,39 @@ export const CanvasConfigControls: React.FC<CanvasConfigControlsProps> = ({
                 <button
                   type="button"
                   onClick={handleSelectImage}
-                  className="px-3.5 py-2 rounded-lg bg-bg-surface border border-border hover:border-accent hover:text-accent text-text-primary text-xs font-medium flex items-center gap-2 transition-colors"
+                  disabled={uploadingImage}
+                  className="px-3.5 py-2 rounded-lg bg-bg-surface border border-border hover:border-accent hover:text-accent text-text-primary text-xs font-medium flex items-center gap-2 transition-colors disabled:opacity-60"
                 >
-                  <Upload className="w-4 h-4" />
-                  {bgImage ? "Ganti Gambar" : "Pilih Gambar Latar"}
+                  {uploadingImage ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4" />
+                  )}
+                  {uploadingImage
+                    ? "Mengunggah..."
+                    : bgImage
+                      ? "Ganti Gambar"
+                      : "Pilih Gambar Latar"}
                 </button>
                 {bgImage ? (
-                  <div className="flex items-center gap-2 text-xs text-text-secondary truncate max-w-xs bg-bg-surface px-2.5 py-1.5 rounded-md border border-border">
-                    <span className="truncate">Image selected</span>
+                  <div className="flex items-center gap-2 text-xs text-text-secondary max-w-xs bg-bg-surface px-2.5 py-1.5 rounded-md border border-border">
+                    {previewUrl && (
+                      <img
+                        src={previewUrl}
+                        alt="Preview latar belakang"
+                        className="w-8 h-8 rounded object-cover border border-border shrink-0"
+                      />
+                    )}
+                    <span className="truncate" title={bgImage}>
+                      {bgImageName}
+                    </span>
                     <button
                       type="button"
-                      onClick={() => onChange({ ...config, background_image_path: "" })}
-                      className="text-red-400 hover:text-red-300 p-0.5"
+                      onClick={() => {
+                        setPreviewUrl("");
+                        onChange({ ...config, background_image_path: "" });
+                      }}
+                      className="text-red-400 hover:text-red-300 p-0.5 shrink-0"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -285,6 +325,17 @@ export const CanvasConfigControls: React.FC<CanvasConfigControlsProps> = ({
                   </span>
                 )}
               </div>
+              {imageError && (
+                <div className="flex items-center gap-2 text-xs text-red-500">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{imageError}</span>
+                </div>
+              )}
+              {bgImage && !previewUrl && (
+                <p className="text-xs text-text-tertiary">
+                  Gambar tersimpan di server: <span className="font-mono">{bgImage}</span>
+                </p>
+              )}
             </div>
           )}
 

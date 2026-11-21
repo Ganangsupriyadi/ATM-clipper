@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
-import { FileVideo, Download, XCircle, ArrowRight, Sparkles } from "lucide-react";
+import { FileVideo, Download, XCircle, ArrowRight, Sparkles, Star } from "lucide-react";
 import { getVideoStreamUrl, getDownloadUrl } from "../../api";
+import { VideoPreview } from "../VideoPreview";
 
 export const ResultsModal: React.FC<{
   isOpen: boolean;
@@ -11,6 +12,7 @@ export const ResultsModal: React.FC<{
     title?: string;
     duration?: number;
     social?: any;
+    score?: number;
   }>;
   onEditSubtitle?: (clipIndex: number) => void;
   onRerenderClip?: (clipId: string) => void;
@@ -33,38 +35,58 @@ export const ResultsModal: React.FC<{
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-2 sm:p-4 py-6 sm:py-10" onClick={(e) => { if(e.target === e.currentTarget) onClose(); }}>
         <div 
-          className="bg-white border border-border w-full max-w-5xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col my-auto max-h-[92vh] overflow-hidden"
+          className="bg-white border border-border w-full max-w-5xl rounded-xl sm:rounded-2xl shadow-2xl flex flex-col my-auto max-h-[90vh] overflow-hidden"
           role="dialog"
           aria-modal="true"
           aria-labelledby="results-modal-title"
         >
           
-          <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-2xl sm:rounded-t-3xl shrink-0">
-             <div className="flex items-center gap-2.5 sm:gap-3">
-                <FileVideo className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
-                <h2 id="results-modal-title" className="text-lg sm:text-xl font-bold text-text-primary">Your Clips are Ready!</h2>
+          <div className="px-3 py-2.5 sm:px-4 border-b border-border flex items-center justify-between bg-white shrink-0">
+             <div className="flex items-center gap-2">
+                <FileVideo className="w-4 h-4 text-emerald-600" />
+                <h2 id="results-modal-title" className="text-sm font-bold text-text-primary">Klip Siap</h2>
              </div>
-             <button onClick={onClose} aria-label="Close modal" className="text-text-tertiary hover:text-text-primary transition-colors p-1">
-               <XCircle className="w-6 h-6" />
+             <button onClick={onClose} aria-label="Close modal" className="text-text-tertiary hover:text-text-primary transition-colors p-0.5">
+               <XCircle className="w-5 h-5" />
              </button>
           </div>
 
-          <div className="p-3 sm:p-6 overflow-y-auto flex-1 min-h-0 bg-bg-surface/30">
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="p-2.5 sm:p-4 overflow-y-auto flex-1 min-h-0 bg-bg-surface/30">
+             <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
                 {clips.map((clip, i) => (
-                  <div key={clip.id} className="bg-white border border-border rounded-2xl overflow-hidden group flex flex-col shadow-sm hover:shadow-md transition-shadow">
-                     <div className="aspect-[9/16] max-h-[360px] sm:max-h-[400px] shrink-0 bg-slate-900 relative border-b border-border">
-                        <video src={getVideoStreamUrl(clip.path)} preload="metadata" controls playsInline className="w-full h-full object-contain" />
-                     </div>
-                     <div className="p-3.5 sm:p-4 flex flex-col flex-1 min-h-0">
-                        <p className="font-semibold text-sm text-text-primary line-clamp-2 shrink-0 mb-2.5" title={clip.title || `Clip ${i+1}`}>
-                          {clip.title || `Clip ${i+1}`}
-                        </p>
-                        
+                  <div key={clip.id} className="w-full max-w-[248px] mx-auto bg-white border border-border rounded-xl p-2 flex flex-col shadow-sm hover:shadow-md hover:border-emerald-200 transition-all">
+                     <VideoPreview
+                       src={getVideoStreamUrl(clip.path)}
+                       onRerender={onRerenderClip ? () => onRerenderClip(clip.id) : undefined}
+                     />
+                     <div className="flex flex-col flex-1 min-w-0 mt-1.5">
+                        <div className="flex items-start justify-between gap-1.5 mb-1">
+                          <p className="font-semibold text-xs text-text-primary line-clamp-2 leading-snug" title={clip.title || `Clip ${i+1}`}>
+                            {clip.title || `Clip ${i+1}`}
+                          </p>
+                          {typeof clip.score === "number" && (
+                            <div
+                              className={`flex items-center gap-0.5 px-1 py-0.5 rounded border text-[10px] font-bold shrink-0 ${
+                                clip.score >= 80
+                                  ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                  : "bg-amber-50 border-amber-200 text-amber-700"
+                              }`}
+                              title="AI virality score (0-100)"
+                            >
+                              <Star className="w-2.5 h-2.5 fill-current" />
+                              <span>{clip.score}</span>
+                            </div>
+                          )}
+                        </div>
+
                         {clip.social && (
-                           <div className="flex-1 max-h-48 overflow-y-auto pr-1 custom-scrollbar text-xs">
-                             <div className="font-semibold text-text-primary flex items-center gap-1.5 mb-2">
-                               <Sparkles className="w-3.5 h-3.5 text-emerald-600" /> Social Kit
+                           <details className="mb-1">
+                             <summary className="cursor-pointer text-[11px] font-semibold text-emerald-700 select-none">
+                               Social kit
+                             </summary>
+                             <div className="mt-1.5 max-h-40 overflow-y-auto pr-1 custom-scrollbar text-[11px]">
+                             <div className="font-semibold text-text-primary flex items-center gap-1.5 mb-1.5">
+                               <Sparkles className="w-3 h-3 text-emerald-600" /> Social Kit
                              </div>
                              {(() => {
                                const thumbnail = clip.social.thumbnail_layout;
@@ -113,49 +135,50 @@ export const ResultsModal: React.FC<{
                                  </div>
                                );
                              })()}
-                           </div>
+                             </div>
+                           </details>
                         )}
 
-                        <div className="mt-3 pt-3 flex gap-2 shrink-0 border-t border-border">
+                        <div className="mt-auto pt-2 flex items-center gap-1.5">
                            {onEditSubtitle && (
                              <button
                                onClick={() => onEditSubtitle(i)}
-                               className="flex-1 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-xs font-semibold text-emerald-700 rounded-xl border border-emerald-200 transition-colors text-center"
+                               className="flex-1 px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-[10px] font-semibold text-emerald-700 rounded-md border border-emerald-200 transition-colors"
                                title="Edit Subtitles"
                              >
                                Koreksi Subtitle
                              </button>
                            )}
                            {onRerenderClip && !onEditSubtitle && (
-                             <button onClick={() => onRerenderClip(clip.id)} className="flex-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-xs font-medium text-text-secondary hover:text-text-primary rounded-xl border border-border transition-colors text-center">
+                             <button onClick={() => onRerenderClip(clip.id)} className="flex-1 px-2 py-1 bg-slate-100 hover:bg-slate-200 text-[10px] font-medium text-text-secondary hover:text-text-primary rounded-md border border-border transition-colors">
                                Edit / Rerender
                              </button>
                            )}
-                           <a href={getDownloadUrl(clip.path)} download aria-label="Download clip" className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-text-secondary hover:text-text-primary border border-border rounded-xl transition-colors flex items-center justify-center shrink-0">
-                              <Download className="w-4 h-4" />
+                           <a href={getDownloadUrl(clip.path)} download aria-label="Download clip" className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-text-secondary hover:text-text-primary border border-border rounded-md transition-colors flex items-center justify-center shrink-0">
+                              <Download className="w-3 h-3" />
                            </a>
                         </div>
                      </div>
                   </div>
                 ))}
                 {clips.length === 0 && (
-                  <div className="col-span-full py-12 text-center text-text-tertiary">
+                  <div className="col-span-full py-10 text-center text-text-tertiary text-xs">
                      No clips found.
                   </div>
                 )}
              </div>
           </div>
 
-          <div className="p-6 border-t border-border flex justify-between items-center bg-slate-50/70 rounded-b-3xl shrink-0">
+          <div className="px-3 py-2.5 sm:px-4 border-t border-border flex justify-between items-center bg-slate-50/70 shrink-0">
              {onOpenFolder ? (
-               <button onClick={onOpenFolder} className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors">
-                 Open Output Folder
+               <button onClick={onOpenFolder} className="px-2 py-1 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors">
+                 Buka Folder Output
                </button>
              ) : (
                <div /> /* Placeholder to maintain flex-between layout */
              )}
-             <button onClick={() => { onClose(); if(onResetApp) onResetApp(); }} className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all">
-                Start New Job <ArrowRight className="w-4 h-4" />
+             <button onClick={() => { onClose(); if(onResetApp) onResetApp(); }} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all">
+                Job Baru <ArrowRight className="w-3.5 h-3.5" />
              </button>
           </div>
        </div>

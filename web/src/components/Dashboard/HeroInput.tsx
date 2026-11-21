@@ -1,5 +1,5 @@
-import type React from "react";
-import { useState, useEffect } from "react";
+﻿import type React from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Link as LinkIcon,
   Sparkles,
@@ -9,7 +9,11 @@ import {
   Languages,
   Film,
   AlertCircle,
-  HardDrive
+  HardDrive,
+  Upload,
+  Play,
+  Loader2,
+  ChevronDown
 } from "lucide-react";
 import { OutputStyleSelector, type OutputStyle } from "../OutputStyleSelector";
 import { ToggleSwitch } from "../ToggleSwitch";
@@ -17,6 +21,7 @@ import { DEFAULT_SUBTITLE_CONFIG, type SubtitleConfig } from "../../types/subtit
 import { DEFAULT_CANVAS_CONFIG, type CanvasConfig } from "../../types/canvas";
 import type { CreateJobPayload } from "../../types/job";
 import { GDriveBrowserModal } from "../GDriveBrowserModal";
+import { apiUploadVideo } from "../../api";
 import { CanvasConfigControls } from "../ui/CanvasConfigControls";
 import { SubtitleConfigControls } from "../ui/SubtitleConfigControls";
 
@@ -27,6 +32,15 @@ export interface HeroInputProps {
 }
 
 const STORAGE_DRAFT_INPUT = "ac_draft_hero_input";
+
+const SUPPORTED_DOMAINS = [
+  "youtube.com",
+  "youtu.be",
+  "tiktok.com",
+  "instagram.com",
+  "twitter.com",
+  "x.com",
+];
 
 export const HeroInput: React.FC<HeroInputProps> = ({
   initialUrl = "",
@@ -40,6 +54,11 @@ export const HeroInput: React.FC<HeroInputProps> = ({
   const [whisperModel, setWhisperModel] = useState<string>("small");
   const [language, setLanguage] = useState<string>("auto");
   const [maxClips, setMaxClips] = useState<number>(0);
+  const [clipsOpen, setClipsOpen] = useState<boolean>(false);
+  const [topic, setTopic] = useState<string>("");
+  const [clipFormat, setClipFormat] = useState<string>("general");
+  const [aiSelectClips, setAiSelectClips] = useState<boolean>(true);
+  const [quality, setQuality] = useState<"720p" | "1080p">("1080p");
   const [showAdvanced, setShowAdvanced] = useState<boolean>(true);
   const [isBrowserOpen, setIsBrowserOpen] = useState<boolean>(false);
   const [burnSubtitles, setBurnSubtitles] = useState<boolean>(true);
@@ -55,9 +74,27 @@ export const HeroInput: React.FC<HeroInputProps> = ({
   });
 
   const [trackingMode, setTrackingMode] = useState<"auto" | "center">("auto");
-  const [faceTrackingEngine, setFaceTrackingEngine] = useState<"haar" | "mediapipe">("haar");
+  const [faceTrackingEngine, setFaceTrackingEngine] = useState<"haar" | "mediapipe">("mediapipe");
 
   const [urlError, setUrlError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const clipsRef = useRef<HTMLDivElement>(null);
+
+  const handlePickFile = async (file?: File) => {
+    if (!file) return;
+    setUploading(true);
+    setUrlError(null);
+    try {
+      const localUrl = await apiUploadVideo(file);
+      setUrl(localUrl);
+      if (!title.trim()) setTitle(file.name.replace(/\.[^.]+$/, ""));
+    } catch (err: any) {
+      setUrlError(`Upload gagal: ${err?.message || err}`);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Load drafts from localStorage
   useEffect(() => {
@@ -71,6 +108,10 @@ export const HeroInput: React.FC<HeroInputProps> = ({
         if (parsed.whisperModel) setWhisperModel(parsed.whisperModel);
         if (parsed.language) setLanguage(parsed.language);
         if (parsed.maxClips !== undefined) setMaxClips(parsed.maxClips);
+        if (parsed.topic) setTopic(parsed.topic);
+        if (parsed.clipFormat) setClipFormat(parsed.clipFormat);
+        if (parsed.aiSelectClips !== undefined) setAiSelectClips(parsed.aiSelectClips);
+        if (parsed.quality) setQuality(parsed.quality);
         if (parsed.burnSubtitles !== undefined) setBurnSubtitles(parsed.burnSubtitles);
         if (parsed.enableHook !== undefined) setEnableHook(parsed.enableHook);
         if (parsed.isGamingVideo !== undefined) setIsGamingVideo(parsed.isGamingVideo);
@@ -105,6 +146,10 @@ export const HeroInput: React.FC<HeroInputProps> = ({
           whisperModel,
           language,
           maxClips,
+          topic,
+          clipFormat,
+          aiSelectClips,
+          quality,
           burnSubtitles,
           enableHook,
           isGamingVideo,
@@ -117,7 +162,24 @@ export const HeroInput: React.FC<HeroInputProps> = ({
     } catch {
       // Ignore
     }
-  }, [url, title, outputStyle, whisperModel, language, maxClips, burnSubtitles, enableHook, isGamingVideo, canvasConfig, subtitleConfig, trackingMode, faceTrackingEngine]);
+  }, [url, title, outputStyle, whisperModel, language, maxClips, topic, clipFormat, aiSelectClips, quality, burnSubtitles, enableHook, isGamingVideo, canvasConfig, subtitleConfig, trackingMode, faceTrackingEngine]);
+
+  // Close max-clips popover on outside click / Escape
+  useEffect(() => {
+    if (!clipsOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (!clipsRef.current?.contains(e.target as Node)) setClipsOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setClipsOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [clipsOpen]);
 
   const validateUrl = (testUrl: string): boolean => {
     const clean = testUrl.trim();
@@ -169,11 +231,16 @@ export const HeroInput: React.FC<HeroInputProps> = ({
       caption_style: subtitleConfig.style,
       burn_subs: burnSubtitles,
       enable_hook: enableHook,
-      is_gaming_video: isGamingVideo,
-      quality: "best",
+      // Gaming/Gadget formats need the split-screen framing, so they turn the
+      // gaming flag on by themselves (the toggle stays as a manual override).
+      is_gaming_video: isGamingVideo || clipFormat === "gaming" || clipFormat === "gadget",
+      quality,
       whisper_model: whisperModel,
       language: language === "auto" ? "" : language,
       max_clips: maxClips,
+      topic: topic.trim(),
+      clip_format: clipFormat,
+      ai_select_clips: aiSelectClips,
       canvas_config: canvasConfig,
       subtitle_config: subtitleConfig,
       tracking_mode: trackingMode,
@@ -183,24 +250,21 @@ export const HeroInput: React.FC<HeroInputProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full bg-white border border-border rounded-xl sm:rounded-2xl p-4 sm:p-8 shadow-sm space-y-5 sm:space-y-6">
+    <form onSubmit={handleSubmit} className="ac-form w-full max-w-full min-w-0">
       {/* Video URL Input Section */}
-      <div className="space-y-2.5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-          <label htmlFor="video-url" className="text-sm font-semibold text-text-primary flex items-center gap-2">
-            <LinkIcon className="w-4 h-4 text-emerald-600" />
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <label htmlFor="video-url" className="ac-section-title flex items-center gap-1.5">
+            <LinkIcon className="w-3.5 h-3.5 text-emerald-600" />
             <span>Source Video</span>
-            <span className="text-xs font-normal text-emerald-600">*Required</span>
+            <span className="text-[10px] font-normal text-emerald-600">*wajib</span>
           </label>
-          <div className="flex items-center gap-2 text-xs text-text-secondary">
-            <span className="hidden sm:inline">Supports:</span>
-            <span className="inline-flex items-center gap-1 font-mono text-[10px] sm:text-[11px] bg-bg-surface px-2 py-0.5 rounded text-text-secondary border border-border">
-              <Film className="w-3 h-3 text-red-500" /> YouTube, TikTok, Reels, X
-            </span>
-          </div>
+          <span className="text-[10px] text-text-tertiary truncate">
+            YouTube · TikTok · Reels · X
+          </span>
         </div>
 
-        <div className="relative flex items-center">
+        <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center">
           <input
             id="video-url"
             type="text"
@@ -209,42 +273,64 @@ export const HeroInput: React.FC<HeroInputProps> = ({
               setUrl(e.target.value);
               if (urlError) validateUrl(e.target.value);
             }}
-            placeholder="Paste URL or browse Google Drive..."
+            placeholder="Paste URL atau browse Google Drive..."
             required
-            className={`w-full pl-3 sm:pl-4 pr-24 sm:pr-32 py-2.5 sm:py-3 bg-bg-surface/50 border rounded-xl text-text-primary placeholder:text-text-tertiary text-xs sm:text-sm focus:outline-none focus:bg-white focus:ring-2 transition-all font-mono ${
+            className={`w-full min-w-0 sm:flex-1 px-3 py-2 bg-bg-surface/50 border rounded-lg text-text-primary placeholder:text-text-tertiary text-xs focus:outline-none focus:bg-white focus:ring-2 transition-all font-mono ${
               urlError
                 ? "border-red-500/80 focus:ring-red-500/30"
                 : "border-border focus:border-emerald-500 focus:ring-emerald-500/20"
             }`}
           />
-          <div className="absolute right-2 flex items-center gap-1">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => {
+                handlePickFile(e.target.files?.[0]);
+                e.currentTarget.value = "";
+              }}
+            />
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="ac-url-btn flex-1 sm:flex-none"
+              title="Upload video dari PC"
+            >
+              {uploading ? <Loader2 className="animate-spin" /> : <Upload />}
+              <span>Upload</span>
+            </button>
             <button
               type="button"
               onClick={() => setIsBrowserOpen(true)}
-              className="px-2.5 py-1.5 bg-bg-surface hover:bg-slate-200 text-text-secondary hover:text-text-primary text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 border border-border"
+              className="ac-url-btn flex-1 sm:flex-none"
               title="Browse Google Drive"
             >
-              <HardDrive className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="hidden sm:inline">Drive</span>
+              <HardDrive />
+              <span>Drive</span>
+            </button>
+            <button
+              type="button"
+              onClick={handlePasteClipboard}
+              className="ac-url-btn flex-1 sm:flex-none"
+              title="Paste dari clipboard"
+            >
+              <Clipboard />
+              <span>Paste</span>
             </button>
             {url && (
               <button
                 type="button"
                 onClick={() => setUrl("")}
-                className="p-1.5 text-text-tertiary hover:text-text-primary rounded-lg hover:bg-bg-surface transition-colors"
+                className="ac-url-btn"
                 title="Clear input"
+                style={{ padding: "8px" }}
               >
-                <XCircle className="w-4 h-4" />
+                <XCircle />
               </button>
             )}
-            <button
-              type="button"
-              onClick={handlePasteClipboard}
-              className="px-2.5 py-1.5 bg-bg-surface hover:bg-slate-200 text-text-secondary hover:text-text-primary text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 border border-border"
-            >
-              <Clipboard className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Paste</span>
-            </button>
           </div>
         </div>
 
@@ -267,6 +353,59 @@ export const HeroInput: React.FC<HeroInputProps> = ({
         )}
       </div>
 
+      {/* AI Clip Selection + Topic / Format */}
+      <div className="ac-section">
+        <div className="ac-toggle-row" style={{ borderTop: 0 }}>
+          <div className="ac-toggle-text">
+            <span className="ac-toggle-title">AI Pilih Klip Terbaik</span>
+            <span className="ac-toggle-sub">
+              {aiSelectClips
+                ? "AI memilih momen terbaik dari transkrip."
+                : "Tanpa AI: video dirender utuh sebagai 1 klip."}
+            </span>
+          </div>
+          <ToggleSwitch checked={aiSelectClips} onChange={setAiSelectClips} disabled={isSubmitting} />
+        </div>
+
+        {aiSelectClips && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="space-y-1">
+              <label htmlFor="clip-topic" className="text-[11px] font-medium text-text-secondary">
+                Topik Klip (opsional)
+              </label>
+              <input
+                id="clip-topic"
+                type="text"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                disabled={isSubmitting}
+                placeholder="mis. kesehatan, gadget, film"
+                className="w-full px-2.5 py-1.5 bg-bg-surface/50 border border-border rounded-lg text-text-primary placeholder:text-text-tertiary text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="clip-format" className="text-[11px] font-medium text-text-secondary">
+                Format Klip
+              </label>
+              <select
+                id="clip-format"
+                value={clipFormat}
+                onChange={(e) => setClipFormat(e.target.value)}
+                disabled={isSubmitting}
+                className="w-full px-2.5 py-1.5 bg-bg-surface/50 border border-border rounded-lg text-text-primary text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+              >
+                <option value="general">General / Podcast</option>
+                <option value="review">Review (umum)</option>
+                <option value="gadget">Review Gadget</option>
+                <option value="film">Review Film / Series</option>
+                <option value="gaming">Gaming</option>
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
+
+
       {/* Output Style Selector */}
       <div className="pt-1">
         <OutputStyleSelector
@@ -279,71 +418,51 @@ export const HeroInput: React.FC<HeroInputProps> = ({
       {/* Tracking Mode Options for Portrait */}
       {["face_crop", "canvas_blur", "square"].includes(outputStyle) && (
         <>
-        <div className="pt-4 border-t border-border space-y-2">
-          <label className="text-sm font-semibold text-text-primary">
-            Face Tracking Mode
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setTrackingMode("auto")}
-              className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
-                trackingMode === "auto"
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
-                  : "border-border bg-white text-text-secondary hover:border-slate-300"
-              }`}
-            >
-              <span className="text-sm">Auto Face Tracking</span>
-              <span className="text-xs text-text-tertiary font-normal text-center">AI tracks the primary speaker's face</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setTrackingMode("center")}
-              className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
-                trackingMode === "center"
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
-                  : "border-border bg-white text-text-secondary hover:border-slate-300"
-              }`}
-            >
-              <span className="text-sm">Center Crop</span>
-              <span className="text-xs text-text-tertiary font-normal text-center">Static center (no AI tracking)</span>
-            </button>
-          </div>
-        </div>
-
-        {trackingMode === "auto" && (
-          <div className="pt-2 space-y-2">
-            <label className="text-sm font-semibold text-text-primary">
-              Face Tracking Engine
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="ac-section">
+            <span className="ac-section-title">Face Tracking</span>
+            <div className="ac-chip-row">
               <button
                 type="button"
-                onClick={() => setFaceTrackingEngine("haar")}
-                className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
-                  faceTrackingEngine === "haar"
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
-                    : "border-border bg-white text-text-secondary hover:border-slate-300"
-                }`}
+                onClick={() => setTrackingMode("auto")}
+                className={`ac-chip${trackingMode === "auto" ? " is-selected" : ""}`}
               >
-                <span className="text-sm">Haar Cascade</span>
-                <span className="text-xs text-text-tertiary font-normal text-center">Faster, compatible with all devices (Default)</span>
+                <span className="ac-chip-title">Auto Face Tracking</span>
+                <span className="ac-chip-sub">Follows the main speaker</span>
               </button>
               <button
                 type="button"
-                onClick={() => setFaceTrackingEngine("mediapipe")}
-                className={`py-3 px-3 rounded-xl border transition-colors flex flex-col items-center gap-1 font-medium ${
-                  faceTrackingEngine === "mediapipe"
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/30"
-                    : "border-border bg-white text-text-secondary hover:border-slate-300"
-                }`}
+                onClick={() => setTrackingMode("center")}
+                className={`ac-chip${trackingMode === "center" ? " is-selected" : ""}`}
               >
-                <span className="text-sm">MediaPipe AI</span>
-                <span className="text-xs text-text-tertiary font-normal text-center">Smoother & more stable, needs better hardware</span>
+                <span className="ac-chip-title">Center Crop</span>
+                <span className="ac-chip-sub">Static center, no tracking</span>
               </button>
             </div>
           </div>
-        )}
+
+          {trackingMode === "auto" && (
+            <div className="ac-section">
+              <span className="ac-section-title">Tracking Engine</span>
+              <div className="ac-chip-row">
+                <button
+                  type="button"
+                  onClick={() => setFaceTrackingEngine("haar")}
+                  className={`ac-chip${faceTrackingEngine === "haar" ? " is-selected" : ""}`}
+                >
+                  <span className="ac-chip-title">Haar Cascade</span>
+                  <span className="ac-chip-sub">Faster (default)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFaceTrackingEngine("mediapipe")}
+                  className={`ac-chip${faceTrackingEngine === "mediapipe" ? " is-selected" : ""}`}
+                >
+                  <span className="ac-chip-title">MediaPipe AI</span>
+                  <span className="ac-chip-sub">Smoother, heavier</span>
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -358,48 +477,31 @@ export const HeroInput: React.FC<HeroInputProps> = ({
         </div>
       )}
 
-      {/* Burn Subtitles Toggle */}
-      <div className="pt-3 pb-1 flex items-center justify-between border-t border-border mt-3">
-        <label className="text-sm font-semibold text-text-primary">Burn Subtitles</label>
-        <ToggleSwitch
-          checked={burnSubtitles}
-          onChange={setBurnSubtitles}
-          disabled={isSubmitting}
-        />
-      </div>
-
-      {/* Auto Hook Toggle */}
-      <div className="pt-3 pb-1 flex items-center justify-between border-t border-border mt-3">
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold text-text-primary">
-            Auto Hook
-          </span>
-          <span className="text-xs text-text-secondary">
-            Duplicate 3-5 seconds of engaging moments to the start
-          </span>
+      {/* Burn Subtitles / Auto Hook / Gaming Video */}
+      <div>
+        <div className="ac-toggle-row">
+          <div className="ac-toggle-text">
+            <span className="ac-toggle-title">Burn Subtitles</span>
+            <span className="ac-toggle-sub">Bakar subtitle ke video</span>
+          </div>
+          <ToggleSwitch checked={burnSubtitles} onChange={setBurnSubtitles} disabled={isSubmitting} />
         </div>
-        <ToggleSwitch
-          checked={enableHook}
-          onChange={setEnableHook}
-          disabled={isSubmitting}
-        />
-      </div>
 
-      {/* Gaming Video Toggle */}
-      <div className="pt-3 pb-1 flex items-center justify-between border-t border-border mt-3">
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold text-text-primary">
-            Gaming Video
-          </span>
-          <span className="text-xs text-text-secondary">
-            Auto-detect streamer facecam and use split-screen mode
-          </span>
+        <div className="ac-toggle-row">
+          <div className="ac-toggle-text">
+            <span className="ac-toggle-title">Auto Hook</span>
+            <span className="ac-toggle-sub">3 detik terbaik diputar di awal klip</span>
+          </div>
+          <ToggleSwitch checked={enableHook} onChange={setEnableHook} disabled={isSubmitting} />
         </div>
-        <ToggleSwitch
-          checked={isGamingVideo}
-          onChange={setIsGamingVideo}
-          disabled={isSubmitting}
-        />
+
+        <div className="ac-toggle-row">
+          <div className="ac-toggle-text">
+            <span className="ac-toggle-title">Gaming Video</span>
+            <span className="ac-toggle-sub">Deteksi facecam &amp; split-screen</span>
+          </div>
+          <ToggleSwitch checked={isGamingVideo} onChange={setIsGamingVideo} disabled={isSubmitting} />
+        </div>
       </div>
 
       {/* Subtitle Config Controls */}
@@ -413,18 +515,18 @@ export const HeroInput: React.FC<HeroInputProps> = ({
       )}
 
       {/* Advanced Drawer Toggle */}
-      <div className="border border-border rounded-2xl bg-bg-surface/40 overflow-hidden transition-all mt-4">
+      <div className="border border-border rounded-2xl bg-bg-surface/40 transition-all mt-4">
         <button
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="w-full px-4 py-3 flex items-center justify-between text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-bg-surface/70 transition-colors border-0"
+          className={`w-full px-4 py-3 flex items-center justify-between text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-bg-surface/70 transition-colors border-0 ${showAdvanced ? "rounded-t-2xl" : "rounded-2xl"}`}
         >
           <div className="flex items-center gap-2">
             <Sliders className="w-4 h-4 text-emerald-600" />
             <span>Transcription Settings</span>
           </div>
           <span className="text-[11px] text-text-tertiary font-mono">
-            {showAdvanced ? "Hide options ▲" : "Show options ▼"}
+            {showAdvanced ? "Hide options â–²" : "Show options â–¼"}
           </span>
         </button>
 
@@ -446,8 +548,8 @@ export const HeroInput: React.FC<HeroInputProps> = ({
               />
             </div>
 
-            {/* Language, Whisper Model & Max Clips */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Language, Whisper Model, Max Clips & Download Quality */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-1.5">
                 <label className="font-medium text-text-secondary flex items-center gap-1.5">
                   <Languages className="w-3.5 h-3.5 text-text-tertiary" />
@@ -487,16 +589,68 @@ export const HeroInput: React.FC<HeroInputProps> = ({
                   <Film className="w-3.5 h-3.5 text-text-tertiary" />
                   <span>Max Clips</span>
                 </label>
+                <div className="relative" ref={clipsRef}>
+                  <button
+                    type="button"
+                    onClick={() => setClipsOpen((o) => !o)}
+                    aria-haspopup="listbox"
+                    aria-expanded={clipsOpen}
+                    className="w-full px-3 py-2 flex items-center justify-between bg-bg-surface/50 border border-border rounded-lg text-text-primary text-left focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                  >
+                    <span>
+                      {maxClips === 0
+                        ? "Auto (Based on duration)"
+                        : `${maxClips} Clip${maxClips > 1 ? "s" : ""}`}
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-text-tertiary shrink-0 transition-transform ${
+                        clipsOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {clipsOpen && (
+                    <div
+                      role="listbox"
+                      className="absolute z-30 mt-1 w-full min-w-[11rem] p-1 bg-white border border-border rounded-lg shadow-lg max-h-64 overflow-y-auto"
+                    >
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                        <button
+                          key={n}
+                          type="button"
+                          role="option"
+                          aria-selected={maxClips === n}
+                          onClick={() => {
+                            setMaxClips(n);
+                            setClipsOpen(false);
+                          }}
+                          className={`w-full px-2.5 py-1.5 text-left whitespace-nowrap text-xs rounded ${
+                            maxClips === n
+                              ? "bg-[#2563eb] text-white"
+                              : "hover:bg-bg-surface"
+                          }`}
+                        >
+                          {n === 0
+                            ? "Auto (Based on duration)"
+                            : `${n} Clip${n > 1 ? "s" : ""}`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-medium text-text-secondary flex items-center gap-1.5">
+                  <HardDrive className="w-3.5 h-3.5 text-text-tertiary" />
+                  <span>Download Quality</span>
+                </label>
                 <select
-                  value={maxClips}
-                  onChange={(e) => setMaxClips(Number(e.target.value))}
+                  value={quality}
+                  onChange={(e) => setQuality(e.target.value as "720p" | "1080p")}
                   className="w-full px-3 py-2 bg-bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 >
-                  <option value={0}>Auto (Based on duration)</option>
-                  <option value={1}>1 Clip</option>
-                  <option value={3}>3 Clips</option>
-                  <option value={5}>5 Clips</option>
-                  <option value={10}>10 Clips</option>
+                  <option value="1080p">1080p (Full HD)</option>
+                  <option value="720p">720p (Faster, Smaller)</option>
                 </select>
               </div>
             </div>
@@ -504,24 +658,29 @@ export const HeroInput: React.FC<HeroInputProps> = ({
         )}
       </div>
 
-      <div className="pt-2">
-        <button
-          type="submit"
-          disabled={isSubmitting || !url.trim()}
-          className="w-full py-3 sm:py-3.5 px-4 sm:px-6 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
-        >
+      {/* Submit: full width, always rendered */}
+      <div>
+        <button type="submit" disabled={isSubmitting} className="ac-submit">
           {isSubmitting ? (
             <>
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Submitting to GPU Server...</span>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Processing... Mengirim ke GPU Server</span>
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4" />
-              <span>Transcribe & Generate</span>
+              <Play className="w-4 h-4" />
+              <span>Generate Klip Sekarang</span>
             </>
           )}
         </button>
+        {!url.trim() && (
+          <p className="ac-note warn">Isi URL video atau upload file dulu.</p>
+        )}
+        <p className="ac-note">
+          {aiSelectClips
+            ? `${maxClips > 0 ? Math.min(maxClips, 10) : "Otomatis"} klip · 50-300 detik · skor AI ≥ 65`
+            : "Video dirender utuh sebagai satu klip"}
+        </p>
       </div>
     </form>
   );

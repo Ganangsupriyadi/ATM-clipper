@@ -17,6 +17,7 @@ interface ClipEditModalProps {
   initialCanvasConfig?: CanvasConfig;
   initialTrackingMode?: string;
   initialFaceTrackingEngine?: string;
+  initialBurnSubs?: boolean;
   onClose: () => void;
   onRerenderStart: (newJobId: string) => void;
 }
@@ -29,7 +30,8 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
   initialSubtitleConfig = DEFAULT_SUBTITLE_CONFIG,
   initialCanvasConfig = DEFAULT_CANVAS_CONFIG,
   initialTrackingMode = "auto",
-  initialFaceTrackingEngine = "haar",
+  initialFaceTrackingEngine = "mediapipe",
+  initialBurnSubs = true,
   onClose,
   onRerenderStart,
 }) => {
@@ -42,7 +44,7 @@ export const ClipEditModal: React.FC<ClipEditModalProps> = ({
   const [canvasConfig, setCanvasConfig] = useState<CanvasConfig>(initialCanvasConfig);
   const [trackingMode, setTrackingMode] = useState<string>(initialTrackingMode);
   const [faceTrackingEngine, setFaceTrackingEngine] = useState<string>(initialFaceTrackingEngine);
-  const [burnSubtitles, setBurnSubtitles] = useState<boolean>(true);
+  const [burnSubtitles, setBurnSubtitles] = useState<boolean>(initialBurnSubs);
   
   const [originalWords, setOriginalWords] = useState<any[]>([]);
   const [search, setSearch] = useState("");

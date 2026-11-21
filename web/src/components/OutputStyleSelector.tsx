@@ -1,5 +1,5 @@
-import React from "react";
-import { ScanFace, Layers, Monitor, Square, Check, Sparkles } from "lucide-react";
+﻿import React from "react";
+import { ScanFace, Layers, Monitor, Square, Check } from "lucide-react";
 
 export type OutputStyle = "face_crop" | "canvas_blur" | "landscape" | "square";
 
@@ -95,24 +95,13 @@ export const OutputStyleSelector: React.FC<OutputStyleSelectorProps> = ({
   className = "",
 }) => {
   return (
-    <div className={`space-y-3 ${className}`}>
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-semibold text-text-primary flex items-center gap-2">
-          <span>Output Video Format</span>
-          <span className="text-xs font-normal text-text-tertiary">
-            (Aspect Ratio & Cropping)
-          </span>
-        </label>
-        <span className="text-xs text-text-tertiary hidden sm:inline-block">
-          Select target social media format
-        </span>
+    <div className={`ac-section ${className}`}>
+      <div className="ac-row">
+        <span className="ac-section-title">Output Video Format</span>
+        <span className="ac-section-hint">Aspect Ratio &amp; Cropping</span>
       </div>
 
-      <div
-        role="radiogroup"
-        aria-label="Output Style Selector"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
-      >
+      <div role="radiogroup" aria-label="Output Style Selector" className="ac-style-grid">
         {OUTPUT_STYLE_OPTIONS.map((option) => {
           const isSelected = value === option.id;
           const Icon = option.icon;
@@ -125,72 +114,20 @@ export const OutputStyleSelector: React.FC<OutputStyleSelectorProps> = ({
               aria-checked={isSelected}
               disabled={disabled}
               onClick={() => onChange(option.id)}
-              className={`group relative flex flex-col text-left p-3.5 rounded-2xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 ${
-                disabled
-                  ? "opacity-50 cursor-not-allowed bg-slate-50 border-slate-200"
-                  : isSelected
-                  ? "bg-emerald-50/70 border-emerald-500 shadow-md ring-1 ring-emerald-500/30"
-                  : "bg-white border-border hover:border-slate-300 hover:bg-slate-50/80 shadow-sm"
-              }`}
+              className={`ac-style-card${isSelected ? " is-selected" : ""}`}
             >
-              {/* Top Header inside Card */}
-              <div className="flex items-start justify-between w-full mb-2.5">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`p-1.5 rounded-xl border transition-colors ${
-                      isSelected
-                        ? "bg-emerald-100 border-emerald-200 text-emerald-600"
-                        : "bg-slate-100 border-slate-200 text-slate-500 group-hover:text-slate-700"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-semibold text-text-primary">
-                        {option.label}
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-mono font-medium text-text-tertiary">
-                      {option.ratio}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Selection Indicator or Badge */}
-                <div className="flex items-center gap-1.5">
-                  {option.badge && !isSelected && (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                      {option.id === "face_crop" && <Sparkles className="w-2.5 h-2.5 text-emerald-600" />}
-                      {option.badge}
-                    </span>
-                  )}
-                  <div
-                    className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                      isSelected
-                        ? "bg-emerald-600 border-emerald-600 text-white"
-                        : "border-slate-300 bg-slate-50 group-hover:border-slate-400"
-                    }`}
-                  >
-                    {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                  </div>
-                </div>
+              <div className="ac-style-head">
+                <span className="ac-style-icon">
+                  <Icon />
+                </span>
+                <span className="ac-style-label">{option.label}</span>
+                <span className="ac-style-ratio">{option.ratio}</span>
+                <span className={`ac-radio${isSelected ? " is-selected" : ""}`}>
+                  {isSelected && <Check />}
+                </span>
               </div>
-
-              {/* Visual preview thumbnail */}
-              <div className="my-1 py-1.5 flex items-center justify-center bg-slate-50/80 rounded-xl border border-slate-200/80 h-14">
-                {option.renderPreview()}
-              </div>
-
-              {/* Description */}
-              <p className="text-xs text-text-secondary line-clamp-2 mt-2 leading-relaxed min-h-[2rem]">
-                {option.description}
-              </p>
-
-              {/* Platforms footer */}
-              <div className="mt-2.5 pt-2 border-t border-border flex items-center justify-between text-[11px] text-text-tertiary">
-                <span className="truncate">{option.platforms}</span>
-              </div>
+              <p className="ac-style-desc">{option.description}</p>
+              <span className="ac-style-platforms">{option.platforms}</span>
             </button>
           );
         })}

@@ -62,6 +62,11 @@ export const PromptJsonModal: React.FC<{
   const [inputJson, setInputJson] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [parsedCount, setParsedCount] = useState<number | null>(null);
+  const [expandPrompt, setExpandPrompt] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) setExpandPrompt(false);
+  }, [isOpen, prompt]);
 
   useEffect(() => {
     if (inputJson.trim() === "") {
@@ -164,18 +169,38 @@ export const PromptJsonModal: React.FC<{
                 </button>
              </div>
 
-             <div className="relative group rounded-2xl bg-slate-50 border border-border p-4">
-                <pre className="text-xs text-text-secondary font-mono whitespace-pre-wrap max-h-48 overflow-y-auto">{prompt}</pre>
-                <div className="absolute top-3 right-3 flex gap-2">
-                   <button onClick={handleCopy} className="p-2 rounded-lg bg-white border border-border text-text-secondary hover:text-text-primary shadow-sm transition-colors" title="Copy Prompt">
-                     {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                   </button>
-                   {typeof navigator !== "undefined" && !!navigator.share && (
-                     <button onClick={handleShare} className="p-2 rounded-lg bg-white border border-border text-text-secondary hover:text-text-primary shadow-sm transition-colors" title="Share">
-                       {shared ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
-                     </button>
+             <div className="rounded-2xl bg-slate-50 border border-border">
+                <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
+                   <span className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
+                     <MessageSquareQuote className="w-3.5 h-3.5 text-emerald-600" /> AI Prompt
+                   </span>
+                   <div className="flex gap-2">
+                      <button onClick={handleCopy} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-border text-xs font-medium text-text-secondary hover:text-text-primary shadow-sm transition-colors" title="Copy Prompt">
+                        {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copied ? "Copied!" : "Copy"}
+                      </button>
+                      {typeof navigator !== "undefined" && !!navigator.share && (
+                        <button onClick={handleShare} className="p-1.5 rounded-lg bg-white border border-border text-text-secondary hover:text-text-primary shadow-sm transition-colors" title="Share">
+                          {shared ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
+                        </button>
+                      )}
+                   </div>
+                </div>
+
+                <div className="relative px-4 py-3">
+                   <pre className={`text-xs text-text-secondary font-mono whitespace-pre-wrap ${expandPrompt ? "" : "max-h-36 overflow-hidden"}`}>{prompt}</pre>
+                   {!expandPrompt && (
+                     <div className="pointer-events-none absolute inset-x-4 bottom-0 h-10 bg-gradient-to-t from-slate-50 to-transparent" />
                    )}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setExpandPrompt((v) => !v)}
+                  className="w-full py-2 border-t border-border text-xs font-semibold text-emerald-600 hover:bg-slate-100 transition-colors"
+                >
+                  {expandPrompt ? "Show less" : "Load more"}
+                </button>
              </div>
           </div>
 

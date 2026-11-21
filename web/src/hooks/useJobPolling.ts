@@ -109,6 +109,12 @@ export function useJobPolling(initialJobId?: string | null): UseJobPollingReturn
         if (err?.status === 404) {
           setStatus("ERROR");
           setError("Pekerjaan (Job) tidak ditemukan. Mungkin sudah dihapus atau server di-restart.");
+          // Stale id in localStorage made this fire on every page load.
+          if (typeof window !== "undefined") {
+            localStorage.removeItem(STORAGE_ACTIVE_JOB_KEY);
+          }
+          setJobId(null);
+          activeJobIdRef.current = null;
           stopPolling();
         }
         return null;

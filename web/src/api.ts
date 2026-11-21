@@ -1,11 +1,37 @@
 import type { CreateJobPayload, JobResponse } from "./types/job";
 
-export const API_URL =
-  import.meta.env.VITE_API_URL ||
-  (typeof window !== "undefined" &&
-    (localStorage.getItem("AUTO_CLIPPER_API_URL") ||
-      localStorage.getItem("ac_api_url"))) ||
-  "http://localhost:8000";
+export const STORAGE_URL_KEY = "AUTO_CLIPPER_API_URL";
+
+/**
+ * Collapse whatever the user pasted ("https://https://x.dev", "x.dev/", " 127.0.0.1:8000 ")
+ * into one clean base URL. A doubled scheme makes fetch throw TypeError, which the
+ * login screen used to report as "cannot reach backend".
+ */
+export function normalizeBaseUrl(raw: string): string {
+  let s = (raw || "").trim().replace(/\/+$/, "");
+  if (!s) return "";
+  const m = s.match(/^(https?):\/\//i);
+  const scheme = m ? m[1].toLowerCase() : null;
+  if (scheme) s = s.slice(m![0].length);
+  // Strip any further duplicated schemes the user pasted in front of the host.
+  s = s.replace(/^(https?:\/\/)+/i, "");
+  if (!s) return "";
+  const isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:|\/|$)/i.test(s);
+  return `${scheme || (isLocal ? "http" : "https")}://${s}`;
+}
+
+// Resolved per call, not at module load: the login screen sets the backend URL
+// at runtime, and a frozen constant would keep pointing at localhost.
+export function getApiBase(): string {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem(STORAGE_URL_KEY) || localStorage.getItem("ac_api_url");
+    if (saved) return normalizeBaseUrl(saved);
+  }
+  return normalizeBaseUrl((import.meta.env.VITE_API_URL as string) || "http://localhost:8000");
+}
+
+/** @deprecated use getApiBase() — kept only so old imports don't break */
+export const API_URL = "";
 
 export const STORAGE_AUTH_KEY = "AUTO_CLIPPER_WEB_TOKEN";
 export const STORAGE_AUTH_LEGACY_KEY = "ac_web_token";
@@ -54,6 +80,46 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Verify a token against a backend and distinguish "wrong password" from
+ * "endpoint missing" (older backend without /auth/check).
+ *
+ * Returns:
+ *   "ok"       - token accepted
+ *   "bad"      - 401/403: wrong token
+ *   "legacy"   - /auth/check absent (404): backend is an older build, caller
+ *                should fall back to /history
+ *   "error"    - anything else; `message` explains which status
+ */
+export async function verifyCredentials(
+  baseUrl: string,
+  token: string
+): Promise<{ result: "ok" | "bad" | "legacy" | "error"; status?: number; message?: string }> {
+  const base = normalizeBaseUrl(baseUrl);
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "ngrok-skip-browser-warning": "true",
+  };
+
+  let res: Response;
+  try {
+    res = await fetch(`${base}/auth/check`, { headers });
+  } catch {
+    return { result: "error", message: `tidak bisa menghubungi ${base}` };
+  }
+
+  // 404 = backend predates /auth/check, not a credential problem.
+  if (res.status === 404) return { result: "legacy" };
+  if (res.status === 401 || res.status === 403) return { result: "bad", status: res.status };
+  if (!res.ok) return { result: "error", status: res.status, message: `HTTP ${res.status}` };
+
+  const ctype = res.headers.get("content-type") || "";
+  if (!ctype.includes("application/json")) {
+    return { result: "error", status: res.status, message: "respons bukan JSON, cek URL backend" };
+  }
+  return { result: "ok", status: res.status };
+}
+
 export async function apiFetch<T = any>(
   endpoint: string,
   options: RequestInit = {}
@@ -61,13 +127,16 @@ export async function apiFetch<T = any>(
   const token = getAuthToken();
   const url = endpoint.startsWith("http")
     ? endpoint
-    : `${API_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+    : `${getApiBase()}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
   const headers = new Headers(options.headers || {});
   
   if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
+
+  // ngrok free serves an HTML interstitial to browser requests; this opts out.
+  headers.set("ngrok-skip-browser-warning", "true");
 
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
@@ -99,6 +168,9 @@ export async function apiFetch<T = any>(
     const errorMsg =
       (data && typeof data === "object" && (data.message || data.detail || data.error)) ||
       `Request failed with status ${response.status}`;
+    // Surface the server's message in the console too; the thrown error alone
+    // shows up as a bare 400 in the Network log.
+    console.error(`[api] ${options.method || "GET"} ${url} -> ${response.status}: ${errorMsg}`, data);
     throw new ApiError(errorMsg, response.status, data);
   }
 
@@ -221,13 +293,40 @@ export async function apiCancelJob(jobId: string): Promise<{ status: string }> {
   }
 }
 
+/**
+ * Upload a video from the user's PC. The backend stores it under the workspace
+ * and returns `local:<abs path>`, which /jobs accepts as a source URL.
+ */
+export async function apiUploadVideo(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await apiFetch<{ url: string }>("/upload", { method: "POST", body: fd });
+  if (!res?.url) throw new Error("Upload gagal: backend tidak mengembalikan path.");
+  return res.url;
+}
+
+/**
+ * Upload a canvas background/poster image and return its absolute path on the
+ * backend. Canvas mode hands this path straight to ffmpeg, so the browser's
+ * `blob:` URL is useless there — it must be a real server-side file.
+ */
+export async function apiUploadImage(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await apiFetch<{ path: string }>("/upload/image", { method: "POST", body: fd });
+  if (!res?.path) throw new Error("Upload gambar gagal: backend tidak mengembalikan path.");
+  return res.path;
+}
+
 export function getVideoStreamUrl(pathOrUrl: string, version?: number): string {
   if (!pathOrUrl) return "";
   if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
     return pathOrUrl;
   }
   const vParam = version !== undefined && version !== 0 ? `&v=${version}` : "";
-  return `${API_URL}/video?path=${encodeURIComponent(pathOrUrl)}${vParam}`;
+  // ngrok-skip-browser-warning: <video>/<a download> can't send custom headers,
+  // so the query param form is the only way to bypass ngrok's HTML interstitial.
+  return `${getApiBase()}/video?path=${encodeURIComponent(pathOrUrl)}${vParam}&ngrok-skip-browser-warning=1`;
 }
 
 export function getDownloadUrl(pathOrUrl: string, version?: number, customName?: string): string {

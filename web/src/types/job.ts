@@ -63,6 +63,9 @@ export interface JobMetadata {
   language?: string;
   tracking_mode?: string;
   face_tracking_engine?: string;
+  topic?: string;
+  clip_format?: string;
+  ai_select_clips?: boolean;
 }
 
 export interface JobResponse {
@@ -101,4 +104,7 @@ export interface CreateJobPayload {
   subtitle_config?: SubtitleConfig;
   tracking_mode?: string;
   face_tracking_engine?: string;
+  topic?: string;
+  clip_format?: string;
+  ai_select_clips?: boolean;
 }

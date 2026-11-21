@@ -10,6 +10,7 @@ import { DEFAULT_CANVAS_CONFIG, type CanvasConfig } from "../types/canvas";
 import { ClipCard } from "./ClipCard";
 import { ClipEditModal } from "./ClipEditModal";
 import { SocialKitModal } from "./SocialKitModal";
+import { ToggleSwitch } from "./ToggleSwitch";
 
 interface HistoryListProps {
   onResume: (jobId: string) => void;
@@ -26,6 +27,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
   const [outputStyle, setOutputStyle] = useState<OutputStyle>("face_crop");
   const [canvasConfig, setCanvasConfig] = useState<CanvasConfig>(DEFAULT_CANVAS_CONFIG);
   const [subtitleConfig, setSubtitleConfig] = useState<SubtitleConfig>(DEFAULT_SUBTITLE_CONFIG);
+  const [burnSubs, setBurnSubs] = useState<boolean>(true);
 
   const [activeAiId, setActiveAiId] = useState<string | null>(null);
   const [extraPrompt, setExtraPrompt] = useState<string>("");
@@ -82,7 +84,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
         caption_style: subtitleConfig.style,
         canvas_config: canvasConfig,
         subtitle_config: subtitleConfig,
-        burn_subs: true,
+        burn_subs: burnSubs,
       };
 
       const res = await apiCreateRerenderJob(jobId, payload);
@@ -352,6 +354,13 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
                     <CanvasConfigControls config={canvasConfig} onChange={setCanvasConfig} showModeSwitch={false} />
                   )}
                   <SubtitleConfigControls config={subtitleConfig} onChange={setSubtitleConfig} showModeSwitch={true} />
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-text-primary">Burn Subtitles</span>
+                      <span className="text-xs text-text-secondary">Matikan untuk render tanpa subtitle sama sekali.</span>
+                    </div>
+                    <ToggleSwitch checked={burnSubs} onChange={setBurnSubs} disabled={isSubmittingPanel} />
+                  </div>
                   <button
                     onClick={() => handleRerenderSubmit(job.id)}
                     disabled={isSubmittingPanel}
@@ -408,6 +417,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onResume, onResumeManu
           initialSubtitleConfig={activeEditClip.job.metadata?.subtitle_config || DEFAULT_SUBTITLE_CONFIG}
           initialTrackingMode={activeEditClip.job.metadata?.tracking_mode || "auto"}
           initialFaceTrackingEngine={activeEditClip.job.metadata?.face_tracking_engine || "haar"}
+          initialBurnSubs={(activeEditClip.job as any).result_clips?.[activeEditClip.index]?.subs ?? activeEditClip.job.metadata?.burn_subs ?? true}
           onClose={() => setActiveEditClip(null)}
           onRerenderStart={(newJobId) => {
             setActiveEditClip(null);

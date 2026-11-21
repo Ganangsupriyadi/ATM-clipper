@@ -7,10 +7,10 @@ export const WorkspacePage: React.FC = () => {
   const ctx = React.useContext(AppContext);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-4xl mx-auto space-y-4 sm:space-y-6">
-      <header className="mb-2 sm:mb-4">
-        <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Workspace</h1>
-        <p className="text-xs sm:text-sm text-text-secondary mt-1">
+    <div className="p-3 sm:p-5 max-w-3xl mx-auto space-y-3 sm:space-y-4 min-w-0">
+      <header>
+        <h1 className="text-lg sm:text-xl font-bold text-text-primary">Workspace</h1>
+        <p className="text-[11px] sm:text-xs text-text-secondary">
           Automated short-form video generation on Google Colab GPU
         </p>
       </header>
